@@ -1,0 +1,1 @@
+export const API_BASE_URL = "https://resumegenius-ai-backend.onrender.com";

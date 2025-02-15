@@ -12,7 +12,7 @@ router.post("/analyze-resume", upload.single("resume"), async (req, res) => {
             return res.status(400).json({ error: "Resume file or job description missing!" });
         }
 
-        console.log("✅ Resume Uploaded:", req.file.path);
+        //console.log("✅ Resume Uploaded:", req.file.path);
 
         // ✅ Extract text & keywords from uploaded resume
         const resumeData = await parseResume(req.file.path);
@@ -34,6 +34,7 @@ router.post("/analyze-resume", upload.single("resume"), async (req, res) => {
 
 // ✅ AI Suggestions Route - Ensure Single Response
 router.post("/get-suggestions", async (req, res) => {
+    const filePath = req.file?.path; // ✅ Get the uploaded file path
     try {
         const { resumeData, jobDescription } = req.body;
 
@@ -50,6 +51,14 @@ router.post("/get-suggestions", async (req, res) => {
 
         if (!res.headersSent) {  // ✅ Prevent multiple responses
             return res.status(500).json({ error: "Internal Server Error" });
+        }
+    } finally {
+        // ✅ Delete the file after AI processing
+        if (filePath && fs.existsSync(filePath)) {
+            fs.unlink(filePath, (err) => {
+                if (err) console.error(`❌ Error deleting file: ${filePath}`, err);
+                else console.log(`✅ Successfully deleted file: ${filePath}`);
+            });
         }
     }
 });

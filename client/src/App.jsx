@@ -115,7 +115,7 @@ function App() {
             feedback = "🔥 Excellent!";
         } else if (data.scorePercentage >= 80) {
             feedback = "✅ Very Good!";
-        } else if (data.scorePercentage >= 70) {
+        } else if (data.scorePercentage >= 65) {
             feedback = "🟡 Good, but can be improved.";
         } else {
             feedback = "🔴 Needs Improvement!";
@@ -155,43 +155,58 @@ const handleAiSuggestionRequest = async () => {
 
     const data = await response.json();
 
-    if (!Array.isArray(data.aiSuggestions) || data.aiSuggestions.length < 2) {
+    if (!Array.isArray(data.aiSuggestions) || data.aiSuggestions.length === 0) {
       throw new Error("Invalid AI suggestions format");
     }
 
-    // Extract first message (introduction)
-    const introduction = `<p>${data.aiSuggestions[0]}</p>`;
+    // 🔹 Extract & clean up AI suggestions
+    let aiSuggestions = data.aiSuggestions.map((suggestion) => suggestion.trim()).filter((s) => s !== "");
 
-    // Extract last message (conclusion) and separate it from improvements
-    const conclusion = `<p style="margin-top: 10px; font-size: 14px; color: #780000;">${data.aiSuggestions[data.aiSuggestions.length - 1]}</p>`;
+    // 🔹 Ensure exactly 5 suggestions
+    if (aiSuggestions.length > 5) {
+      aiSuggestions = aiSuggestions.slice(1, 6); // Take the first 5 suggestions
+    } else {
+      while (aiSuggestions.length < 5) {
+        aiSuggestions.push("More details can improve this section."); // Fill up to 5
+      }
+    }
 
-    // Format AI suggestions dynamically (excluding last message)
+    // 🔹 Check if there's an extra conclusion message (more than 5)
+    let conclusionMessage = "";
+    if (data.aiSuggestions.length > 5) {
+      conclusionMessage = `<p style="margin-top: 10px; font-size: 14px; color: #780000;">
+        ${data.aiSuggestions[data.aiSuggestions.length - 1]}
+      </p>`;
+    }
+
+    // 🔹 Formatting function for bold text
     const formatTextWithStrongTags = (text) => {
       return text.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>"); // Converts **bold** to <strong>bold</strong>
     };
 
-    const formattedAiSuggestions = data.aiSuggestions.slice(1, -1).map((suggestion) => `
+    // 🔹 Format AI suggestions dynamically
+    const formattedAiSuggestions = aiSuggestions.map((suggestion) => `
       <div style="background: #2d3748; padding: 12px; border-radius: 8px; margin-bottom: 10px;">
         <span style="color: #00FF7F;">✔️</span>
         <span style="color: #D1D5DB;"> ${formatTextWithStrongTags(suggestion)}</span>
       </div>
     `).join("");
 
-    // Combine into a single structured message
+    // 🔹 Final structured message
     const finalMessage = `
       <div style="background-color: #ffd166; padding: 15px; border-radius: 10px; color: #780000; font-family: 'Poppins', sans-serif;">
         <p><strong>🚀 AI-Suggested Resume Improvements</strong></p>
-        ${introduction}
         ${formattedAiSuggestions}
-        ${conclusion} <!-- Displayed as normal text below -->
+        ${conclusionMessage} <!-- Displayed separately if present -->
       </div>
     `;
 
     setMessages((prev) => [
       ...prev,
       { sender: "bot", text: finalMessage },
-      { sender: "bot", text: "🎉 Thank you for using ResumeGenius AI! Hope you improve and succeed in job selection! 🎯" },
+      { sender: "bot", text: "🎉 Thank you for using ResumeGenius AI! Hope you'll improve and succeed in job selection! 🎯" },
     ]);
+
     setChatEnded(true);
     const timestamp = new Date().toISOString();
     localStorage.setItem("lastChatTimestamp", timestamp);
@@ -199,7 +214,7 @@ const handleAiSuggestionRequest = async () => {
   } catch (error) {
     setMessages((prev) => [
       ...prev,
-      { sender: "bot", text: "⚠️ Oops! AI suggestions couldn't be fetched." },
+      { sender: "bot", text: "⚠️ Oops! AI suggestions couldn't be fetched. Try again after a few mins!" },
     ]);
   }
 
@@ -696,7 +711,7 @@ const handleAiSuggestionRequest = async () => {
           <strong>📌 How to Use:</strong> 
         </Typography>
         <ul style={{ paddingLeft: "20px" }}>
-          <li>Upload your resume (PDF, DOC, DOCX).</li>
+          <li>Upload your resume (PDF only).</li>
           <li>Provide a job description to analyze match score.</li>
           <li>Receive AI suggestions for resume improvements.</li>
         </ul>

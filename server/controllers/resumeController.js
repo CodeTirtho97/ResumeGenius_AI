@@ -110,6 +110,7 @@ const suggestResumeImprovements = async (resumeData, jobDescription) => {
 
 // ✅ Compare Resume with Job Description + AI Feedback
 const compareResumeWithJobDescription = async (req, res) => {
+    const filePath = req.file?.path; // ✅ Get the uploaded file path
     try {
         const { resumeData, jobDescription } = req.body;
 
@@ -150,7 +151,7 @@ const compareResumeWithJobDescription = async (req, res) => {
 
         const scorePercentage = maxScore > 0 ? ((score / maxScore) * 100).toFixed(2) : 0;
 
-        console.log("✅ Calculated Match Score:", scorePercentage);
+        //console.log("✅ Calculated Match Score:", scorePercentage);
 
         res.json({ matchedSkills, matchedEducation, matchedJobTitles, matchedCertifications, scorePercentage });
 
@@ -162,6 +163,7 @@ const compareResumeWithJobDescription = async (req, res) => {
 
 // ✅ AI Suggestions Route (Fetch AI-generated resume improvements)
 const getAiSuggestions = async (resumeData, jobDescription) => {
+    const filePath = resumeData.file?.path; // ✅ Get the uploaded file path
     try {
         const prompt = `
         Given the following resume details:
@@ -191,6 +193,14 @@ const getAiSuggestions = async (resumeData, jobDescription) => {
     } catch (error) {
         console.error("❌ Error generating AI suggestions:", error);
         return ["AI suggestions could not be generated."]; // ✅ Ensure a fallback array
+    } finally {
+        // ✅ Delete the file after AI processing
+        if (filePath && fs.existsSync(filePath)) {
+            fs.unlink(filePath, (err) => {
+                if (err) console.error(`❌ Error deleting file: ${filePath}`, err);
+                else console.log(`✅ Successfully deleted file: ${filePath}`);
+            });
+        }
     }
 };
 
@@ -202,5 +212,5 @@ module.exports = {
     },
     suggestResumeImprovements,
     compareResumeWithJobDescription,
-    getAiSuggestions // ✅ New function added here
+    getAiSuggestions, // ✅ New function added here
 };

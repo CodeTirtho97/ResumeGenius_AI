@@ -2,7 +2,7 @@
 
 ResumeGenius AI is an **AI-powered resume analysis and optimization tool** that helps job seekers improve their resumes by matching them against job descriptions and providing **ATS-friendly** enhancements. It leverages **OpenAI's GPT-4**, **resume parsing algorithms**, and **intelligent job-resume matching** to help candidates optimize their applications for better job selection chances.
 
-
+![image](https://github.com/user-attachments/assets/c8a83b45-ca82-4a8d-b365-9329d225fba5)
 
 ---
 
@@ -28,9 +28,11 @@ ResumeGenius AI is an **AI-powered resume analysis and optimization tool** that 
 
 ### 🏆 AI-powered Resume Analysis
 
+![image](https://github.com/user-attachments/assets/ce4ae363-65e4-4544-af1c-f2649ebcdef1)
 
 ### 🎯 AI Suggestions & Skill Gap Analysis
 
+![image](https://github.com/user-attachments/assets/dcae0e38-00f0-4cbd-9427-2596782002c8)
 
 ---
 

@@ -2,7 +2,7 @@
 
 ResumeGenius AI is an **AI-powered resume analysis and optimization tool** that helps job seekers improve their resumes by matching them against job descriptions and providing **ATS-friendly** enhancements. It leverages **OpenAI's GPT-4**, **resume parsing algorithms**, and **intelligent job-resume matching** to help candidates optimize their applications for better job selection chances.
 
-
+![image](https://github.com/user-attachments/assets/c8a83b45-ca82-4a8d-b365-9329d225fba5)
 
 ---
 
@@ -28,9 +28,11 @@ ResumeGenius AI is an **AI-powered resume analysis and optimization tool** that 
 
 ### 🏆 AI-powered Resume Analysis
 
+![image](https://github.com/user-attachments/assets/ce4ae363-65e4-4544-af1c-f2649ebcdef1)
 
 ### 🎯 AI Suggestions & Skill Gap Analysis
 
+![image](https://github.com/user-attachments/assets/dcae0e38-00f0-4cbd-9427-2596782002c8)
 
 ---
 
@@ -51,7 +53,7 @@ ResumeGenius AI is an **AI-powered resume analysis and optimization tool** that 
 ---
 
 ## 🏗 Folder Structure
-    ```bash
+
     /ResumeGenius_AI
     │── /client                # React frontend
     │   ├── /src
@@ -66,19 +68,18 @@ ResumeGenius AI is an **AI-powered resume analysis and optimization tool** that 
     │   ├── server.js          # Express Server
     │── package.json           # Dependencies
     │── README.md              # Documentation
-    ```
 
 ---
 
 ## 🚀 Installation & Setup
 
 ### **1️⃣ Clone the Repository**
-    ```bash
+
     git clone https://github.com/CodeTirtho97/ResumeGenius-AI.git
     cd ResumeGenius-AI
-    ```
+
 ### 2️⃣ Install Dependencies
-    ```bash
+
     # Install frontend dependencies
     cd client
     npm install
@@ -86,17 +87,17 @@ ResumeGenius AI is an **AI-powered resume analysis and optimization tool** that 
     # Install backend dependencies
     cd ../server
     npm install
-    ```
+
 
 ### 3️⃣ Set Up Environment Variables
     Create a .env file inside the /server folder and add:
-    ```bash
+
     OPENAI_API_KEY=your_openai_api_key
     PORT=5000
-    ```
+
 
 ### 4️⃣ Run the Project
-    ```bash
+
     # Start backend
     cd server
     node server.js
@@ -104,27 +105,27 @@ ResumeGenius AI is an **AI-powered resume analysis and optimization tool** that 
     # Start frontend
     cd ../client
     npm start
-    ```
+
     Now visit http://localhost:3000 in your browser.
 
 ---
 
 ## 🎯 API Endpoints
 ### Resume Upload & Parsing
-    ```bash
+
     POST /api/resume/analyze-resume
-    ```
-    - Uploads resume, extracts text, and generates ATS match score.
-    - Body: FormData { resume: file }
-    - Response: { scorePercentage, matchedSkills, extractedEducation, extractedJobTitles }
+
+- Uploads resume, extracts text, and generates ATS match score.
+- Body: FormData { resume: file }
+- Response: { scorePercentage, matchedSkills, extractedEducation, extractedJobTitles }
 
 ### Get AI Suggestions
-    ```bash
+
     POST /api/resume/get-suggestions
-    ```
-    - Generates AI-powered resume improvements.
-    - Body: { resumeData: object, jobDescription: string }
-    - Response: { aiSuggestions: [ "Improve bullet points", "Add technical keywords", ... ] }
+
+- Generates AI-powered resume improvements.
+- Body: { resumeData: object, jobDescription: string }
+- Response: { aiSuggestions: [ "Improve bullet points", "Add technical keywords", ... ] }
 
 ---
 

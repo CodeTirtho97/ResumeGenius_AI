@@ -24,7 +24,7 @@ import {
 import { useEffect } from "react";
 
 function App() {
-  const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || "http://localhost:5000";
+  const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
   const [messages, setMessages] = useState([
     { sender: "bot", text: "👋 Hello! I'm <strong>ResumeGenius AI</strong>. Let's analyze your resume step by step." },
     { sender: "bot", text: "Do you want to upload your resume now?" },

@@ -136,7 +136,6 @@ const compareResumeWithJobDescription = async (req, res) => {
             jobData.extractedCertifications.some(jobCert => cert.toLowerCase().includes(jobCert.toLowerCase()))
         );
 
-        // ✅ Weight-Based Scoring System
         let score = 0;
         const maxScore = 
             (jobData.extractedSkills.length * 10) + 
@@ -144,27 +143,16 @@ const compareResumeWithJobDescription = async (req, res) => {
             (jobData.extractedEducation.length * 8) + 
             (jobData.extractedCertifications.length * 5);
 
-        // Calculate actual matched score
         score += matchedSkills.length * 10;  
         score += matchedJobTitles.length * 15;
         score += matchedEducation.length * 8;
         score += matchedCertifications.length * 5;
 
-        // ✅ Fix Score Normalization
         const scorePercentage = maxScore > 0 ? ((score / maxScore) * 100).toFixed(2) : 0;
+
         console.log("✅ Calculated Match Score:", scorePercentage);
 
-        // ✅ AI Feedback
-        const aiSuggestions = await suggestResumeImprovements(resumeData, jobDescription);
-
-        res.json({ 
-            matchedSkills, 
-            matchedEducation, 
-            matchedJobTitles, 
-            matchedCertifications, 
-            scorePercentage, 
-            aiSuggestions 
-        });
+        res.json({ matchedSkills, matchedEducation, matchedJobTitles, matchedCertifications, scorePercentage });
 
     } catch (error) {
         console.error("❌ Error comparing resume:", error);
@@ -172,11 +160,47 @@ const compareResumeWithJobDescription = async (req, res) => {
     }
 };
 
-// ✅ Export All Functions
-module.exports = {
+// ✅ AI Suggestions Route (Fetch AI-generated resume improvements)
+const getAiSuggestions = async (resumeData, jobDescription) => {
+    try {
+        const prompt = `
+        Given the following resume details:
+        ${JSON.stringify(resumeData, null, 2)}
+
+        And the following job description:
+        ${jobDescription}
+
+        Suggest 5 major improvements as bullet points to better align the resume with the job description.
+        `;
+
+        const response = await openai.chat.completions.create({
+            model: "gpt-4o-mini",
+            messages: [{ role: "system", content: prompt }],
+            max_tokens: 500
+        });
+
+        if (!response || !response.choices || response.choices.length === 0 || !response.choices[0].message) {
+            throw new Error("Invalid OpenAI response: No message content found.");
+        }
+
+        // ✅ Ensure AI response is returned as an array of suggestions
+        const suggestions = response.choices[0].message.content.trim().split("\n").filter(s => s.trim() !== "");
+
+        return suggestions; // ✅ Return an array instead of a single string
+
+    } catch (error) {
+        console.error("❌ Error generating AI suggestions:", error);
+        return ["AI suggestions could not be generated."]; // ✅ Ensure a fallback array
+    }
+};
+
+// ✅ Ensure both functions are exported
+module.exports = { 
     parseResume: async (filePath) => {
         const extractedText = await extractTextFromPDF(filePath);
         return extractedText ? extractRelevantKeywords(extractedText) : { error: "Failed to extract text" };
     },
-    compareResumeWithJobDescription
+    suggestResumeImprovements,
+    compareResumeWithJobDescription,
+    getAiSuggestions // ✅ New function added here
 };

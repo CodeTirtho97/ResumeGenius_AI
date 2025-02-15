@@ -24,7 +24,7 @@ import {
 import { useEffect } from "react";
 
 function App() {
-  const API_BASE_URL = process.env.REACT_APP_BACKEND_URL; // ✅ Load from .env
+  const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || "http://localhost:5000";
   const [messages, setMessages] = useState([
     { sender: "bot", text: "👋 Hello! I'm <strong>ResumeGenius AI</strong>. Let's analyze your resume step by step." },
     { sender: "bot", text: "Do you want to upload your resume now?" },
@@ -102,7 +102,7 @@ function App() {
     formData.append("jobDescription", jobDescription);
 
     try {
-        const response = await fetch(`${API_BASE_URL}/api/resume/analyze-resume`, { 
+            const response = await fetch(`${BACKEND_URL}/api/resume/analyze-resume`, {
             method: "POST",
             body: formData, // ✅ Using FormData instead of JSON
         });
@@ -148,7 +148,7 @@ const handleAiSuggestionRequest = async () => {
   setShowTyping(true);
 
   try {
-    const response = await fetch(`${API_BASE_URL}/api/resume/get-suggestions`, {
+      const response = await fetch(`${BACKEND_URL}/api/resume/get-suggestions`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ resumeData: file, jobDescription }),

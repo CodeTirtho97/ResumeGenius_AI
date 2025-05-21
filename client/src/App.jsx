@@ -5,7 +5,6 @@ import {
   Button,
   Paper,
   IconButton,
-  Divider,
   Tooltip,
   Modal,
   TextField,
@@ -18,14 +17,15 @@ import {
   FaPaperclip,
   FaRobot,
   FaUser,
-  FaInfoCircle,
 } from "react-icons/fa";
 
-// Import new components
+// Import custom components
 import SkillsRadarChart from './components/SkillsRadarChart';
 import TailoredBulletPoints from './components/TailoredBulletPoints';
 import SkeletonLoader from './components/SkeletonLoader';
 import ProcessingAnimation from './components/ProcessingAnimation';
+import InfoPanel from './components/InfoPanel';
+import BackgroundSVG from './components/BackgroundSVG';
 
 function App() {
   const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
@@ -354,20 +354,23 @@ const handleTailorResume = async () => {
     <Box
       sx={{
         minHeight: "100vh",
-        background: "linear-gradient(135deg, #0A1929 0%, #102A43 100%)",
         padding: { xs: "15px", md: "30px" },
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         overflow: "hidden",
+        position: "relative",
       }}
     >
+      
+      <BackgroundSVG />
+
       {/* App Header with improved styling */}
       <Box 
         sx={{ 
           textAlign: "center", 
           marginBottom: "30px",
-          background: 'rgba(0,0,0,0.15)',
+          background: 'rgba(10, 25, 41, 0.4)',
           padding: '1.5rem',
           borderRadius: '16px',
           backdropFilter: 'blur(10px)',
@@ -375,6 +378,25 @@ const handleTailorResume = async () => {
           border: '1px solid rgba(255, 255, 255, 0.05)',
           width: { xs: '95%', md: '70%', lg: '60%' },
           maxWidth: '800px',
+          // Add pulse animation to the title glow
+          '&::after': {
+            content: '""',
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: '100%',
+            height: '100%',
+            background: 'radial-gradient(circle, rgba(0, 224, 255, 0.15) 0%, rgba(0, 224, 255, 0) 70%)',
+            borderRadius: '16px',
+            zIndex: -1,
+            animation: 'pulse 8s infinite',
+          },
+          '@keyframes pulse': {
+            '0%': { opacity: 0.5 },
+            '50%': { opacity: 0.8 },
+            '100%': { opacity: 0.5 },
+          },
         }}
       >
         <Typography
@@ -408,7 +430,7 @@ const handleTailorResume = async () => {
         </Typography>
       </Box>
 
-      {/* Main content area with improved layout */}
+      {/* Main content area */}
       <Box
         sx={{
           display: "flex",
@@ -420,13 +442,13 @@ const handleTailorResume = async () => {
           alignItems: { xs: "center", lg: "flex-start" },
         }}
       >
-        {/* Chat Window - Improved styling */}
+        {/* Chat Window */}
         <Paper
           sx={{
             flex: "3",
             height: { xs: "60vh", sm: "70vh" },
             width: { xs: "95%", sm: "90%", md: "80%", lg: "auto" },
-            backgroundColor: "#121E2E",
+            backgroundColor: "rgba(18, 30, 46, 0.7)", // More transparent
             borderRadius: "16px",
             boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
             padding: { xs: "15px", sm: "20px" },
@@ -437,6 +459,7 @@ const handleTailorResume = async () => {
             gap: "15px",
             color: "white",
             border: "1px solid rgba(255, 255, 255, 0.05)",
+            backdropFilter: "blur(10px)", // Add blur effect for glass morphism
             '&::-webkit-scrollbar': {
               width: '6px',
             },
@@ -785,174 +808,8 @@ const handleTailorResume = async () => {
           )}
         </Paper>
 
-        {/* Info Panel - Right Side - Improved styling */}
-        <Paper
-          sx={{
-            flex: { xs: "1", lg: "1.5" },
-            height: { xs: "auto", lg: "70vh" },
-            width: { xs: "95%", sm: "90%", md: "80%", lg: "auto" },
-            backgroundColor: "rgba(31, 41, 55, 0.5)",
-            color: "white",
-            borderRadius: "16px",
-            boxShadow: "0 6px 18px rgba(0,0,0,0.3)",
-            padding: "25px",
-            marginBottom: "30px",
-            border: "1px solid rgba(255, 255, 255, 0.05)",
-            backdropFilter: "blur(10px)",
-            display: "flex",
-            flexDirection: "column",
-            gap: 2,
-          }}
-        >
-          <Typography 
-            variant="h6" 
-            fontWeight="bold"
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: 1,
-              color: '#00E0FF',
-              fontSize: { xs: '1.1rem', sm: '1.2rem' },
-            }}
-          >
-            <FaInfoCircle /> Info Panel
-          </Typography>
-          
-          <Divider sx={{ background: "rgba(255, 255, 255, 0.1)", my: 1 }} />
-          
-          <Box>
-            <Typography 
-              variant="h5"
-              sx={{
-                fontSize: { xs: '1rem', sm: '1.1rem' },
-                color: '#FFFFFF',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1,
-                mb: 1,
-              }}
-            >
-              <span style={{ color: '#FF9800' }}>📌</span>
-              <strong>How to Use:</strong> 
-            </Typography>
-            
-            <ul style={{ 
-              paddingLeft: "20px", 
-              marginTop: "8px",
-              fontSize: '0.9rem',
-              color: '#E0E0E0',
-              listStyleType: 'none',
-            }}>
-              <li style={{ marginBottom: '8px', display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
-                <span style={{ color: '#00E0FF' }}>•</span> Upload your resume (PDF only).
-              </li>
-              <li style={{ marginBottom: '8px', display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
-                <span style={{ color: '#00E0FF' }}>•</span> Provide a job description to analyze match score.
-              </li>
-              <li style={{ marginBottom: '8px', display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
-                <span style={{ color: '#00E0FF' }}>•</span> Receive AI suggestions for resume improvements.
-              </li>
-            </ul>
-          </Box>
-          
-          <Divider sx={{ background: "rgba(255, 255, 255, 0.1)", my: 1 }} />
-          
-          <Box>
-            <Typography 
-              variant="h5"
-              sx={{
-                fontSize: { xs: '1rem', sm: '1.1rem' },
-                color: '#FFFFFF',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1,
-                mb: 1,
-              }}
-            >
-              <span style={{ color: '#00E0FF' }}>🔍</span>
-              <strong>AI-Powered Analysis:</strong> 
-            </Typography>
-            
-            <ul style={{ 
-              paddingLeft: "20px", 
-              marginTop: "8px",
-              fontSize: '0.9rem',
-              color: '#E0E0E0',
-              listStyleType: 'none',
-            }}>
-              <li style={{ marginBottom: '8px', display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
-                <span style={{ color: '#06d6a0' }}>•</span> Calculates ATS match score.
-              </li>
-              <li style={{ marginBottom: '8px', display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
-                <span style={{ color: '#06d6a0' }}>•</span> Identifies missing keywords & skills.
-              </li>
-              <li style={{ marginBottom: '8px', display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
-                <span style={{ color: '#06d6a0' }}>•</span> Suggests modifications for better job fit.
-              </li>
-            </ul>
-          </Box>
-          
-          <Divider sx={{ background: "rgba(255, 255, 255, 0.1)", my: 1 }} />
-          
-          <Box>
-            <Typography 
-              variant="h5"
-              sx={{
-                fontSize: { xs: '1rem', sm: '1.1rem' },
-                color: '#FFFFFF',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1,
-                mb: 1,
-              }}
-            >
-              <span style={{ color: '#FFC107' }}>⚠️</span>
-              <strong>Data Privacy & Usage:</strong> 
-            </Typography>
-            
-            <ul style={{ 
-              paddingLeft: "20px", 
-              marginTop: "8px",
-              fontSize: '0.9rem',
-              color: '#E0E0E0',
-              listStyleType: 'none',
-            }}>
-              <li style={{ marginBottom: '8px', display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
-                <span style={{ color: '#FF9800' }}>•</span> One resume analysis per hour.
-              </li>
-              <li style={{ marginBottom: '8px', display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
-                <span style={{ color: '#FF9800' }}>•</span> Resume data is automatically deleted after 24 hours.
-              </li>
-              <li style={{ marginBottom: '8px', display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
-                <span style={{ color: '#FF9800' }}>•</span> Results are cached for faster processing.
-              </li>
-            </ul>
-          </Box>
-
-          {/* New section for cached results info */}
-          <Box sx={{ 
-            mt: 2,
-            background: 'rgba(0, 224, 255, 0.1)',
-            borderRadius: '10px',
-            padding: '12px',
-            border: '1px solid rgba(0, 224, 255, 0.2)',
-          }}>
-            <Typography 
-              sx={{
-                fontSize: '0.8rem',
-                color: '#BBB',
-                textAlign: 'center',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: 0.5,
-              }}
-            >
-              <span style={{ color: '#00E0FF', fontSize: '1rem', marginBottom: '4px' }}>🔒</span>
-              Your resume data is securely stored and automatically deleted after 24 hours to protect your privacy.
-            </Typography>
-          </Box>
-        </Paper>
+        <InfoPanel />
+        
       </Box>
 
       {/* Job Description Modal - Improved styling */}

@@ -1,12 +1,14 @@
 /* === 🌟 Global Styling - Modern Dark Theme === */
 body {
-  background: linear-gradient(to bottom right, #141E30, #243B55); /* Deep blue gradient */
+  /* Remove background from here as it will be handled by the BackgroundSVG component */
   color: #ffffff;
-  font-family: "Poppins", sans-serif;
+  font-family: "Inter", "Poppins", sans-serif;
+  /* Add Inter as primary font */
   text-align: center;
   margin: 0;
   padding: 0;
-  overflow: hidden;
+  overflow-x: hidden;
+  /* Changed from overflow: hidden to allow vertical scrolling */
 }
 
 /* === 🏗️ Layout Setup === */
@@ -23,7 +25,8 @@ body {
 .app-heading {
   font-size: 36px;
   font-weight: bold;
-  color: #ffffff;
+  color: #00E0FF;
+  /* Updated color to match new theme */
   text-align: center;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -33,14 +36,16 @@ body {
 .app-subheading {
   font-size: 16px;
   font-weight: 400;
-  color: #d1d1d1;
+  color: #06d6a0;
+  /* Updated color to match new theme */
   text-align: center;
   margin-bottom: 30px;
 }
 
 /* === 💬 Chat Window === */
 .chat-window {
-  background: #ffffff;
+  background: rgba(18, 30, 46, 0.7);
+  /* Updated with transparent bg for glass effect */
   width: 600px;
   height: 650px;
   display: flex;
@@ -50,26 +55,40 @@ body {
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
   overflow: hidden;
   padding: 15px;
+  backdrop-filter: blur(10px);
+  /* Added for glass effect */
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  /* Added subtle border */
 }
 
 /* === 🔹 Info Panel - On Right Side === */
 .info-panel {
   width: 320px;
   height: 600px;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(31, 41, 55, 0.5);
+  /* Updated bg color */
   color: #ffffff;
   border-radius: 15px;
   padding: 20px;
   text-align: left;
   backdrop-filter: blur(8px);
   box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  /* Added subtle border */
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
 }
 
 .info-panel h3 {
   font-size: 20px;
   font-weight: bold;
-  color: #ffffff;
+  color: #00E0FF;
+  /* Updated color */
   margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .info-panel p {
@@ -80,16 +99,22 @@ body {
 
 /* === 🔹 Chat Header === */
 .chat-header {
-  background: #007bff;
+  background: rgba(10, 25, 41, 0.95);
+  /* Updated with transparent bg */
   color: white;
   padding: 15px;
   font-size: 18px;
   font-weight: bold;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
+  /* Changed to space-between */
   border-radius: 12px;
   margin-bottom: 10px;
+  backdrop-filter: blur(10px);
+  /* Added for glass effect */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  /* Added subtle border */
 }
 
 /* === 🗨️ Chat Bubbles === */
@@ -109,21 +134,36 @@ body {
   border-radius: 15px;
   font-size: 15px;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
+  /* Changed to flex-start for better alignment */
   gap: 8px;
   animation: fadeIn 0.4s ease-in-out;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  /* Added subtle shadow */
+  backdrop-filter: blur(5px);
+  /* Added blur effect */
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  /* Added subtle border */
+  word-break: break-word;
+  /* Prevent overflow of long words */
 }
 
 .bot-message {
-  background: #e3f2fd;
+  background: rgba(57, 62, 70, 0.6);
+  /* Updated bg color */
   align-self: flex-start;
+  border-radius: 15px 15px 15px 0;
+  /* Custom shape */
 }
 
 .user-message {
-  background: #007BFF;
+  background: linear-gradient(135deg, #00ADB5 0%, #0097A7 100%);
+  /* Gradient bg */
   color: white;
   align-self: flex-end;
   text-align: right;
+  border-radius: 15px 15px 0 15px;
+  /* Custom shape */
 }
 
 /* === 🔘 Chat Buttons - Modern Look === */
@@ -135,25 +175,34 @@ body {
 }
 
 button {
-  background: linear-gradient(135deg, #007bff, #0056b3);
-  color: white;
+  background: linear-gradient(135deg, #00E0FF 0%, #06d6a0 100%);
+  /* Updated colors */
+  color: #0A1929;
+  /* Dark text for better contrast */
   padding: 12px 18px;
-  border-radius: 10px;
+  border-radius: 30px;
+  /* Rounded corners */
   font-weight: bold;
   cursor: pointer;
   border: none;
   transition: all 0.3s ease-in-out;
-  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 224, 255, 0.3);
+  font-family: "Inter", sans-serif;
+  text-transform: none;
+  font-size: 14px;
+  letter-spacing: 0.5px;
 }
 
 button:hover {
-  background: linear-gradient(135deg, #0056b3, #003c82);
-  box-shadow: 0 6px 18px rgba(0, 123, 255, 0.5);
+  background: linear-gradient(135deg, #06d6a0 0%, #00E0FF 100%);
+  /* Reverse gradient on hover */
+  box-shadow: 0 6px 18px rgba(0, 224, 255, 0.5);
   transform: translateY(-2px);
 }
 
 button:active {
-  transform: scale(0.97);
+  transform: translateY(1px);
+  box-shadow: none;
 }
 
 /* === 📁 File Upload Styling === */
@@ -161,9 +210,13 @@ button:active {
   display: flex;
   align-items: center;
   gap: 10px;
-  background: #e3f2fd;
-  padding: 12px;
-  border-radius: 8px;
+  background: rgba(57, 62, 70, 0.5);
+  /* Updated bg color */
+  padding: 12px 16px;
+  border-radius: 15px 15px 15px 0;
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 input[type="file"] {
@@ -171,18 +224,19 @@ input[type="file"] {
 }
 
 .upload-label {
-  background: #007bff;
+  background: rgba(255, 160, 0, 0.1);
+  /* Updated bg color */
   padding: 10px 20px;
   border-radius: 8px;
   cursor: pointer;
   font-weight: bold;
   color: white;
   display: inline-block;
-  transition: 0.3s ease-in-out;
+  transition: all 0.2s;
 }
 
 .upload-label:hover {
-  background: #0056b3;
+  background: rgba(255, 160, 0, 0.2);
   transform: scale(1.05);
 }
 
@@ -191,28 +245,42 @@ textarea {
   width: 100%;
   padding: 12px;
   border-radius: 10px;
-  border: 1px solid #ccc;
-  background: white;
-  color: #333;
+  border: 1px solid rgba(0, 224, 255, 0.3);
+  /* Updated border color */
+  background: rgba(10, 25, 41, 0.7);
+  /* Updated bg color */
+  color: #E0E0E0;
+  /* Updated text color */
   resize: none;
   transition: 0.3s ease-in-out;
-  font-size: 16px;
+  font-size: 14px;
+  font-family: "Inter", sans-serif;
+  caret-color: #00E0FF;
+  /* Cursor color */
 }
 
 textarea:focus {
-  border-color: #007bff;
+  border-color: #00E0FF;
   outline: none;
-  box-shadow: 0 0 10px rgba(0, 123, 255, 0.3);
+  box-shadow: 0 0 12px rgba(0, 224, 255, 0.3);
+}
+
+textarea::placeholder {
+  color: #8FA3BF;
+  opacity: 1;
 }
 
 /* === 📌 AI Suggestions Box === */
 .suggestions-card {
-  background: rgba(0, 123, 255, 0.08);
+  background: rgba(0, 224, 255, 0.08);
+  /* Updated bg color */
   padding: 15px;
   border-radius: 10px;
-  box-shadow: 0 4px 10px rgba(0, 123, 255, 0.2);
+  box-shadow: 0 4px 10px rgba(0, 224, 255, 0.2);
   text-align: left;
   animation: fadeIn 0.8s ease-in-out;
+  border: 1px solid rgba(0, 224, 255, 0.2);
+  /* Added subtle border */
 }
 
 /* === 📊 Progress Bar for Score === */
@@ -220,7 +288,8 @@ textarea:focus {
   width: 100%;
   height: 12px;
   border-radius: 6px;
-  background: #ddd;
+  background: rgba(221, 221, 221, 0.2);
+  /* Made semi-transparent */
   position: relative;
   overflow: hidden;
 }
@@ -228,7 +297,8 @@ textarea:focus {
 .progress-fill {
   height: 100%;
   width: 0%;
-  background: linear-gradient(90deg, #28a745, #007bff);
+  background: linear-gradient(90deg, #06d6a0, #00E0FF);
+  /* Updated colors */
   transition: width 1s ease-in-out;
 }
 
@@ -236,14 +306,15 @@ textarea:focus {
 .match-score {
   font-size: 22px;
   font-weight: bold;
-  color: #007bff;
+  color: #00E0FF;
+  /* Updated color */
   margin-top: 10px;
   transition: transform 0.3s ease-in-out;
 }
 
 .match-score:hover {
   transform: scale(1.1);
-  text-shadow: 0 0 10px rgba(0, 123, 255, 0.8);
+  text-shadow: 0 0 10px rgba(0, 224, 255, 0.8);
 }
 
 /* === 🏆 Fancy Hover Effects === */
@@ -255,18 +326,324 @@ textarea:focus {
   transform: scale(1.1);
 }
 
-/* === 🛑 Hide Scrollbars - No Clutter === */
+/* === 📱 Custom Scrollbar - Modern Look === */
 ::-webkit-scrollbar {
-  display: none;
+  width: 6px;
+  height: 6px;
 }
 
-body {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
 }
 
-/* === 🎇 Fade In Animation === */
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 224, 255, 0.3);
+  border-radius: 3px;
+  transition: all 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 224, 255, 0.5);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* === 🎇 Animation Keyframes === */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+
+  100% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+@keyframes glow {
+  0% {
+    filter: blur(10px) brightness(1);
+  }
+
+  50% {
+    filter: blur(15px) brightness(1.2);
+  }
+
+  100% {
+    filter: blur(10px) brightness(1);
+  }
+}
+
+@keyframes tilt {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  25% {
+    transform: rotate(1deg);
+  }
+
+  75% {
+    transform: rotate(-1deg);
+  }
+
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes sparkle {
+
+  0%,
+  100% {
+    opacity: 0.2;
+  }
+
+  50% {
+    opacity: 0.7;
+  }
+}
+
+@keyframes rotateCircuit {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes dash {
+  to {
+    stroke-dashoffset: 1000;
+  }
+}
+
+@keyframes connectionPulse {
+  0% {
+    stroke-width: 0.5;
+    opacity: 0.3;
+  }
+
+  50% {
+    stroke-width: 1.5;
+    opacity: 0.7;
+  }
+
+  100% {
+    stroke-width: 0.5;
+    opacity: 0.3;
+  }
+}
+
+/* === 🌟 Glass Morphism Effect === */
+.glass-effect {
+  background: rgba(18, 30, 46, 0.6);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.glass-effect-light {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+/* === 🚀 Button Variants === */
+.btn-primary {
+  background: linear-gradient(135deg, #00E0FF 0%, #06d6a0 100%);
+  color: #0A1929;
+}
+
+.btn-secondary {
+  background: linear-gradient(135deg, #FFC107 0%, #FF9800 100%);
+  color: #0A1929;
+}
+
+.btn-danger {
+  background: linear-gradient(135deg, #FF5757 0%, #FF3131 100%);
+  color: white;
+}
+
+.btn-success {
+  background: linear-gradient(135deg, #36B37E 0%, #2D9E6D 100%);
+  color: white;
+}
+
+/* === 💫 Text Effects === */
+.text-gradient {
+  background: linear-gradient(90deg, #00E0FF, #06d6a0);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-shadow {
+  text-shadow: 0 2px 10px rgba(0, 224, 255, 0.3);
+}
+
+/* === 🎨 Color Variables === */
+:root {
+  --primary-blue: #00E0FF;
+  --primary-green: #06d6a0;
+  --dark-blue-bg: #0A192F;
+  --darker-blue-bg: #102A43;
+  --text-light: #F7FAFC;
+  --text-dim: #A0AEC0;
+  --accent-orange: #FF9800;
+  --accent-yellow: #FFC107;
+  --accent-red: #FF5733;
+  --success-green: #36B37E;
+}
+
+/* === 📱 Mobile Responsiveness Tweaks === */
+@media (max-width: 768px) {
+  .app-heading {
+    font-size: 1.8rem !important;
+  }
+
+  .app-subheading {
+    font-size: 1rem !important;
+  }
+
+  .chat-window {
+    height: 60vh !important;
+  }
+
+  .info-panel {
+    padding: 12px !important;
+  }
+
+  button {
+    font-size: 0.9rem !important;
+    padding: 10px 14px !important;
+  }
+
+  .bot-message,
+  .user-message {
+    font-size: 0.8rem !important;
+  }
+}
+
+/* === 📦 Utility Classes === */
+.w-full {
+  width: 100%;
+}
+
+.h-full {
+  height: 100%;
+}
+
+.flex {
+  display: flex;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.rounded-full {
+  border-radius: 9999px;
+}
+
+.rounded-lg {
+  border-radius: 8px;
+}
+
+.overflow-hidden {
+  overflow: hidden;
+}
+
+.relative {
+  position: relative;
+}
+
+.absolute {
+  position: absolute;
+}
+
+.z-10 {
+  z-index: 10;
+}
+
+.opacity-50 {
+  opacity: 0.5;
+}
+
+.transition-all {
+  transition: all 0.3s ease;
+}
+
+/* === 📑 Accordion Styling for Info Panel === */
+.MuiAccordion-root {
+  background: rgba(10, 25, 41, 0.7) !important;
+  color: white !important;
+  box-shadow: none !important;
+  margin-bottom: 8px !important;
+}
+
+.MuiAccordion-root:before {
+  display: none !important;
+}
+
+.MuiAccordionSummary-content {
+  margin: 10px 0 !important;
+}
+
+.MuiAccordionSummary-expandIconWrapper {
+  color: #00E0FF !important;
+}
+
+.MuiAccordionDetails-root {
+  padding: 0 12px 12px 12px !important;
 }

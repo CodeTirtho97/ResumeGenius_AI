@@ -624,26 +624,77 @@ textarea::placeholder {
   transition: all 0.3s ease;
 }
 
-/* === 📑 Accordion Styling for Info Panel === */
-.MuiAccordion-root {
-  background: rgba(10, 25, 41, 0.7) !important;
+.info-panel-header {
   color: white !important;
-  box-shadow: none !important;
-  margin-bottom: 8px !important;
 }
 
-.MuiAccordion-root:before {
-  display: none !important;
+/* Style for accordion headers */
+.accordion-header {
+  color: white !important;
+  font-weight: 600 !important;
+  font-size: 1rem !important;
 }
 
-.MuiAccordionSummary-content {
-  margin: 10px 0 !important;
+/* Style for accordion section titles */
+.section-title-how-to-use {
+  color: white !important;
 }
 
-.MuiAccordionSummary-expandIconWrapper {
+.section-title-how-to-use svg {
+  color: #FF9800 !important;
+}
+
+.section-title-ai-analysis {
+  color: white !important;
+}
+
+.section-title-ai-analysis svg {
   color: #00E0FF !important;
 }
 
+.section-title-privacy {
+  color: white !important;
+}
+
+.section-title-privacy svg {
+  color: #FFC107 !important;
+}
+
+/* Improved spacing for list items */
+.info-list-item {
+  margin-bottom: 10px !important;
+  padding-right: 10px !important;
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 10px !important;
+}
+
+.info-list-bullet {
+  min-width: 10px !important;
+  display: inline-block !important;
+}
+
+/* Better contrast for section background */
+.MuiAccordion-root.info-accordion {
+  background-color: rgba(10, 25, 41, 0.9) !important;
+}
+
+/* Fix for the expanded sections container */
 .MuiAccordionDetails-root {
-  padding: 0 12px 12px 12px !important;
+  padding: 0 12px 16px 12px !important;
+}
+
+/* Fix for the footer security notice */
+.security-notice {
+  background-color: rgba(10, 25, 41, 0.8) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.security-notice-text {
+  color: #E0E0E0 !important;
+}
+
+/* Main panel background - darker for better contrast */
+.info-panel-container {
+  background-color: rgba(18, 30, 46, 0.85) !important;
 }

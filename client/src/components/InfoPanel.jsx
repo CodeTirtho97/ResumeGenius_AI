@@ -26,17 +26,18 @@ const InfoPanel = () => {
 
   return (
     <Paper
+      className="info-panel-container"
       sx={{
         flex: { xs: "1", lg: "1.5" },
         height: { xs: "auto", lg: "70vh" },
         width: { xs: "95%", sm: "90%", md: "80%", lg: "auto" },
-        backgroundColor: "rgba(31, 41, 55, 0.5)",
+        backgroundColor: "rgba(18, 30, 46, 0.85)", // Darker background for better contrast
         color: "white",
         borderRadius: "16px",
         boxShadow: "0 6px 18px rgba(0,0,0,0.3)",
         padding: "15px",
         marginBottom: "30px",
-        border: "1px solid rgba(255, 255, 255, 0.05)",
+        border: "1px solid rgba(255, 255, 255, 0.1)",
         backdropFilter: "blur(10px)",
         display: "flex",
         flexDirection: "column",
@@ -45,26 +46,29 @@ const InfoPanel = () => {
       }}
     >
       <Typography 
+        className="info-panel-header"
         variant="h6" 
         fontWeight="bold"
         sx={{
           display: "flex",
           alignItems: "center",
           gap: 1,
-          color: '#00E0FF',
+          color: 'white', // Changed to white for better visibility
           fontSize: { xs: '1.1rem', sm: '1.2rem' },
-          padding: "0 10px"
+          padding: "0 10px",
+          mb: 1
         }}
       >
-        <FaInfoCircle /> Info Panel
+        <FaInfoCircle style={{ color: '#00E0FF' }} /> Info Panel
       </Typography>
       
       {/* How to Use - Always open */}
       <Accordion 
+        className="info-accordion"
         expanded={expanded === 'howToUse'} 
         onChange={handleChange('howToUse')}
         sx={{
-          background: 'rgba(10, 25, 41, 0.7)',
+          background: 'rgba(10, 25, 41, 0.9)', // Darker background
           color: 'white',
           borderRadius: '10px !important', // Important to override MUI defaults
           mb: 1,
@@ -85,9 +89,10 @@ const InfoPanel = () => {
           }}
         >
           <Typography 
+            className="section-title-how-to-use accordion-header"
             sx={{
               fontSize: { xs: '0.95rem', sm: '1rem' },
-              color: '#FF9800',
+              color: 'white', // Changed to white for better visibility
               display: 'flex',
               alignItems: 'center',
               gap: 1,
@@ -97,22 +102,25 @@ const InfoPanel = () => {
             <FaRocket style={{ color: '#FF9800' }} /> How to Use:
           </Typography>
         </AccordionSummary>
-        <AccordionDetails sx={{ padding: '0 12px 12px 12px' }}>
+        <AccordionDetails sx={{ padding: '0 12px 16px 12px' }}>
           <ul style={{ 
             paddingLeft: "20px", 
-            marginTop: "0",
+            margin: "0",
             fontSize: '0.9rem',
             color: '#E0E0E0',
             listStyleType: 'none',
           }}>
-            <li style={{ marginBottom: '8px', display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
-              <span style={{ color: '#00E0FF' }}>•</span> Upload your resume (PDF only).
+            <li className="info-list-item" style={{ marginBottom: '10px', display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+              <span className="info-list-bullet" style={{ color: '#00E0FF', minWidth: '8px' }}>•</span> 
+              <span>Upload your resume (PDF only).</span>
             </li>
-            <li style={{ marginBottom: '8px', display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
-              <span style={{ color: '#00E0FF' }}>•</span> Provide a job description to analyze match score.
+            <li className="info-list-item" style={{ marginBottom: '10px', display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+              <span className="info-list-bullet" style={{ color: '#00E0FF', minWidth: '8px' }}>•</span> 
+              <span>Provide a job description to analyze match score.</span>
             </li>
-            <li style={{ marginBottom: '8px', display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
-              <span style={{ color: '#00E0FF' }}>•</span> Receive AI suggestions for resume improvements.
+            <li className="info-list-item" style={{ marginBottom: '10px', display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+              <span className="info-list-bullet" style={{ color: '#00E0FF', minWidth: '8px' }}>•</span> 
+              <span>Receive AI suggestions for resume improvements.</span>
             </li>
           </ul>
         </AccordionDetails>
@@ -120,10 +128,11 @@ const InfoPanel = () => {
       
       {/* AI-Powered Analysis */}
       <Accordion 
+        className="info-accordion"
         expanded={expanded === 'aiAnalysis'} 
         onChange={handleChange('aiAnalysis')}
         sx={{
-          background: 'rgba(10, 25, 41, 0.7)',
+          background: 'rgba(10, 25, 41, 0.9)', // Darker background
           color: 'white',
           borderRadius: '10px !important',
           mb: 1,
@@ -144,9 +153,10 @@ const InfoPanel = () => {
           }}
         >
           <Typography 
+            className="section-title-ai-analysis accordion-header"
             sx={{
               fontSize: { xs: '0.95rem', sm: '1rem' },
-              color: '#00E0FF',
+              color: 'white', // Changed to white for better visibility
               display: 'flex',
               alignItems: 'center',
               gap: 1,
@@ -156,22 +166,25 @@ const InfoPanel = () => {
             <FaSearchPlus style={{ color: '#00E0FF' }} /> AI-Powered Analysis:
           </Typography>
         </AccordionSummary>
-        <AccordionDetails sx={{ padding: '0 12px 12px 12px' }}>
+        <AccordionDetails sx={{ padding: '0 12px 16px 12px' }}>
           <ul style={{ 
             paddingLeft: "20px", 
-            marginTop: "0",
+            margin: "0",
             fontSize: '0.9rem',
             color: '#E0E0E0',
             listStyleType: 'none',
           }}>
-            <li style={{ marginBottom: '8px', display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
-              <span style={{ color: '#06d6a0' }}>•</span> Calculates ATS match score.
+            <li className="info-list-item" style={{ marginBottom: '10px', display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+              <span className="info-list-bullet" style={{ color: '#06d6a0', minWidth: '8px' }}>•</span> 
+              <span>Calculates ATS match score.</span>
             </li>
-            <li style={{ marginBottom: '8px', display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
-              <span style={{ color: '#06d6a0' }}>•</span> Identifies missing keywords & skills.
+            <li className="info-list-item" style={{ marginBottom: '10px', display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+              <span className="info-list-bullet" style={{ color: '#06d6a0', minWidth: '8px' }}>•</span> 
+              <span>Identifies missing keywords & skills.</span>
             </li>
-            <li style={{ marginBottom: '8px', display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
-              <span style={{ color: '#06d6a0' }}>•</span> Suggests modifications for better job fit.
+            <li className="info-list-item" style={{ marginBottom: '10px', display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+              <span className="info-list-bullet" style={{ color: '#06d6a0', minWidth: '8px' }}>•</span> 
+              <span>Suggests modifications for better job fit.</span>
             </li>
           </ul>
         </AccordionDetails>
@@ -179,10 +192,11 @@ const InfoPanel = () => {
       
       {/* Data Privacy & Usage */}
       <Accordion 
+        className="info-accordion"
         expanded={expanded === 'privacy'} 
         onChange={handleChange('privacy')}
         sx={{
-          background: 'rgba(10, 25, 41, 0.7)',
+          background: 'rgba(10, 25, 41, 0.9)', // Darker background
           color: 'white',
           borderRadius: '10px !important',
           mb: 1,
@@ -203,9 +217,10 @@ const InfoPanel = () => {
           }}
         >
           <Typography 
+            className="section-title-privacy accordion-header"
             sx={{
               fontSize: { xs: '0.95rem', sm: '1rem' },
-              color: '#FFC107',
+              color: 'white', // Changed from yellow for better visibility
               display: 'flex',
               alignItems: 'center',
               gap: 1,
@@ -215,39 +230,46 @@ const InfoPanel = () => {
             <FaLock style={{ color: '#FFC107' }} /> Data Privacy & Usage:
           </Typography>
         </AccordionSummary>
-        <AccordionDetails sx={{ padding: '0 12px 12px 12px' }}>
+        <AccordionDetails sx={{ padding: '0 12px 16px 12px' }}>
           <ul style={{ 
             paddingLeft: "20px", 
-            marginTop: "0",
+            margin: "0",
             fontSize: '0.9rem',
             color: '#E0E0E0',
             listStyleType: 'none',
           }}>
-            <li style={{ marginBottom: '8px', display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
-              <span style={{ color: '#FF9800' }}>•</span> One resume analysis per hour.
+            <li className="info-list-item" style={{ marginBottom: '10px', display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+              <span className="info-list-bullet" style={{ color: '#FF9800', minWidth: '8px' }}>•</span> 
+              <span>One resume analysis per hour.</span>
             </li>
-            <li style={{ marginBottom: '8px', display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
-              <span style={{ color: '#FF9800' }}>•</span> Resume data is automatically deleted after 24 hours.
+            <li className="info-list-item" style={{ marginBottom: '10px', display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+              <span className="info-list-bullet" style={{ color: '#FF9800', minWidth: '8px' }}>•</span> 
+              <span>Resume data is automatically deleted after 24 hours.</span>
             </li>
-            <li style={{ marginBottom: '8px', display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
-              <span style={{ color: '#FF9800' }}>•</span> Results are cached for faster processing.
+            <li className="info-list-item" style={{ marginBottom: '10px', display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+              <span className="info-list-bullet" style={{ color: '#FF9800', minWidth: '8px' }}>•</span> 
+              <span>Results are cached for faster processing.</span>
             </li>
           </ul>
         </AccordionDetails>
       </Accordion>
       
       {/* Security notice */}
-      <Box sx={{ 
-        mt: 'auto',
-        background: 'rgba(0, 224, 255, 0.1)',
-        borderRadius: '10px',
-        padding: '12px',
-        border: '1px solid rgba(0, 224, 255, 0.2)',
-      }}>
+      <Box 
+        className="security-notice"
+        sx={{ 
+          mt: 'auto',
+          background: 'rgba(10, 25, 41, 0.8)', // Darker and more opaque
+          borderRadius: '10px',
+          padding: '12px',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
+        }}
+      >
         <Typography 
+          className="security-notice-text"
           sx={{
-            fontSize: '0.8rem',
-            color: '#BBB',
+            fontSize: '0.85rem',
+            color: '#E0E0E0', // Lighter color for better readability
             textAlign: 'center',
             display: 'flex',
             flexDirection: 'column',
@@ -255,7 +277,7 @@ const InfoPanel = () => {
             gap: 0.5,
           }}
         >
-          <span style={{ color: '#00E0FF', fontSize: '1rem', marginBottom: '4px' }}>🔒</span>
+          <span style={{ color: '#FFC107', fontSize: '1rem', marginBottom: '4px' }}>🔒</span>
           Your resume data is securely stored and automatically deleted after 24 hours.
         </Typography>
       </Box>

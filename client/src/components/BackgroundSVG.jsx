@@ -88,33 +88,15 @@ const BackgroundSVG = () => {
         ))}
       </svg>
 
-      {/* AI-themed decorative elements */}
+      {/* AI-themed decorative elements - REMOVED TOP LEFT FIGURE */}
       <svg
         width="100%"
         height="100%"
         xmlns="http://www.w3.org/2000/svg"
         style={{ position: 'absolute', top: 0, left: 0, opacity: 0.3 }}
       >
-        {/* Brain Abstract Shape */}
-        <g transform="translate(85%, 15%) scale(0.15)">
-          <path
-            d="M100,150 C100,50 200,50 200,150 C300,150 300,250 200,250 C200,350 100,350 100,250 C0,250 0,150 100,150 Z"
-            fill="none"
-            stroke="#00E0FF"
-            strokeWidth="6"
-            opacity="0.5"
-          />
-          <path
-            d="M150,100 L150,300 M100,150 C125,125 175,125 200,150 M100,250 C125,275 175,275 200,250"
-            fill="none"
-            stroke="#00E0FF"
-            strokeWidth="6"
-            opacity="0.5"
-          />
-        </g>
-
-        {/* Document with Checkmarks */}
-        <g transform="translate(10%, 75%) scale(0.1)">
+        {/* Document with Checkmarks - repositioned */}
+        <g transform="translate(90%, 75%) scale(0.1)">
           <rect x="50" y="50" width="200" height="300" rx="10" fill="none" stroke="#06d6a0" strokeWidth="6" />
           <line x1="80" y1="100" x2="220" y2="100" stroke="#06d6a0" strokeWidth="6" />
           <line x1="80" y1="150" x2="220" y2="150" stroke="#06d6a0" strokeWidth="6" opacity="0.7" />

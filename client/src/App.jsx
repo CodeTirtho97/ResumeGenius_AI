@@ -102,26 +102,14 @@ function App() {
 
   const handleJobDescriptionSubmit = async () => {
     if (!file || !jobDescription.trim()) {
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: `${Date.now()}-${Math.random()}`,
-          sender: "bot",
-          text: "⚠️ Please upload a resume and provide a job description.",
-        },
-      ]);
-      return;
+        setMessages((prev) => [...prev, { sender: "bot", text: "⚠️ Please upload a resume and provide a job description." }]);
+        return;
     }
 
     setMessages((prev) => [
-      ...prev,
-      { id: `${Date.now()}-${Math.random()}`, sender: "user", text: "📄 Sent the Job Description" },
-      {
-        id: `${Date.now()}-${Math.random()}`,
-        sender: "bot",
-        showProcessingAnimation: true,
-        processingText: "Analyzing resume & job match...",
-      },
+        ...prev,
+        { sender: "user", text: "📄 Sent the Job Description" },
+        { sender: "bot", showProcessingAnimation: true, processingText: "Analyzing resume & job match..." },
     ]);
 
     setShowJobModal(false);
@@ -132,75 +120,83 @@ function App() {
     formData.append("jobDescription", jobDescription);
 
     try {
-      const response = await fetch(`${BACKEND_URL}/api/resume/analyze-resume`, {
-        method: "POST",
-        body: formData,
-      });
+        const response = await fetch(`${BACKEND_URL}/api/resume/analyze-resume`, {
+            method: "POST",
+            body: formData,
+        });
 
-      if (response.status === 429) {
-        const rateLimitData = await response.json();
+        // Handle rate limiting response
+        if (response.status === 429) {
+            const rateLimitData = await response.json();
+            
+            setMessages((prev) => [
+                ...prev.filter(msg => !msg.showProcessingAnimation),
+                { 
+                    sender: "bot", 
+                    text: `⏳ Rate limit exceeded! You can analyze another resume in ${rateLimitData.cooldownMinutes} minutes.` 
+                }
+            ]);
+            
+            setShowCooldownModal(true);
+            setCooldownMinutes(rateLimitData.cooldownMinutes);
+            setShowTyping(false);
+            return;
+        }
+
+        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+
+        const data = await response.json();
+
+        // Store matched skills and calculate missing skills
+        setMatchedSkills(data.matchedSkills || []);
+        
+        // Extract missing skills from job description
+        const missingSkills = data.extractedSkills ? 
+            data.extractedSkills.filter(skill => !data.matchedSkills.includes(skill)) : [];
+        setMissingSkills(missingSkills);
+
+        let feedback;
+        if (data.scorePercentage >= 90) {
+            feedback = "🔥 Excellent!";
+        } else if (data.scorePercentage >= 80) {
+            feedback = "✅ Very Good!";
+        } else if (data.scorePercentage >= 65) {
+            feedback = "🟡 Good, but can be improved.";
+        } else {
+            feedback = "🔴 Needs Improvement!";
+        }
+
+        // CRITICAL CHANGE: Only add the ATS score and skills radar first,
+        // then add a separate message with the tailor button flag
         setMessages((prev) => [
-          ...prev.filter((msg) => !msg.showProcessingAnimation),
-          {
-            id: `${Date.now()}-${Math.random()}`,
-            sender: "bot",
-            text: `⏳ Rate limit exceeded! You can analyze another resume in ${rateLimitData.cooldownMinutes} minutes.`,
-          },
+            ...prev.filter(msg => !msg.showProcessingAnimation),
+            { 
+                sender: "bot", 
+                text: `Your ATS Score: <strong>${data.scorePercentage}%</strong> ${feedback}`,
+                showSkillsRadar: true
+            }
         ]);
-        setShowCooldownModal(true);
-        setCooldownMinutes(rateLimitData.cooldownMinutes);
-        setShowTyping(false);
-        return;
-      }
-
-      if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-
-      const data = await response.json();
-      setMatchedSkills(data.matchedSkills || []);
-      const missingSkills = data.extractedSkills
-        ? data.extractedSkills.filter((skill) => !data.matchedSkills.includes(skill))
-        : [];
-      setMissingSkills(missingSkills);
-
-      let feedback;
-      if (data.scorePercentage >= 90) {
-        feedback = "🔥 Excellent!";
-      } else if (data.scorePercentage >= 80) {
-        feedback = "✅ Very Good!";
-      } else if (data.scorePercentage >= 65) {
-        feedback = "🟡 Good, but can be improved.";
-      } else {
-        feedback = "🔴 Needs Improvement!";
-      }
-
-      setMessages((prev) => [
-        ...prev.filter((msg) => !msg.showProcessingAnimation),
-        {
-          id: `${Date.now()}-${Math.random()}`,
-          sender: "bot",
-          text: `Your ATS Score: <strong>${data.scorePercentage}%</strong> ${feedback}`,
-          showSkillsRadar: true,
-        },
-        {
-          id: `${Date.now()}-${Math.random()}`,
-          sender: "bot",
-          text: "Would you like me to tailor your resume for this job?",
-          showTailorButton: true,
-        },
-      ]);
+        
+        // Add a slight delay before showing the tailor option
+        setTimeout(() => {
+            setMessages((prev) => [
+                ...prev,
+                { 
+                    sender: "bot", 
+                    text: "Would you like me to tailor your resume for this job?",
+                    showTailorButton: true 
+                }
+            ]);
+        }, 300);
     } catch (error) {
-      setMessages((prev) => [
-        ...prev.filter((msg) => !msg.showProcessingAnimation),
-        {
-          id: `${Date.now()}-${Math.random()}`,
-          sender: "bot",
-          text: "⚠️ Error processing resume. Please try again!",
-        },
-      ]);
+        setMessages((prev) => [
+            ...prev.filter(msg => !msg.showProcessingAnimation),
+            { sender: "bot", text: "⚠️ Error processing resume. Please try again!" },
+        ]);
     }
 
     setShowTyping(false);
-  };
+};
 
   const handleAiSuggestionRequest = async () => {
     setMessages((prev) => [
@@ -782,31 +778,33 @@ function App() {
             </Button>
           )}
 
-          {messages[messages.length - 1].showTailorButton && (
-            <Button
-              onClick={handleTailorResume}
-              sx={{
-                background: "linear-gradient(135deg, #FFC107 0%, #FF9800 100%)",
-                color: "#0A1929",
-                fontWeight: "bold",
-                padding: { xs: "10px 16px", sm: "10px 16px" },
-                borderRadius: "30px",
-                boxShadow: "0px 4px 10px rgba(255, 193, 7, 0.3)",
-                textTransform: "none",
-                transition: "all 0.2s ease-in-out",
-                "&:hover": {
-                  transform: "scale(1.05)",
-                  boxShadow: "0px 6px 15px rgba(255, 193, 7, 0.4)",
-                  background: "linear-gradient(135deg, #FF9800 0%, #FFC107 100%)",
-                },
-                alignSelf: "center",
-                mt: 1,
-                fontSize: { xs: "0.8rem", sm: "0.9rem" },
-              }}
-            >
-              🎯 Tailor My Resume
-            </Button>
-          )}
+{messages[messages.length - 1].showTailorButton && (
+  <Button
+    onClick={handleTailorResume}
+    sx={{
+      background: "linear-gradient(135deg, #FFC107 0%, #FF9800 100%)",
+      color: "#0A1929",
+      fontWeight: "bold",
+      padding: { xs: '12px 20px', sm: '12px 24px' }, // Larger padding
+      borderRadius: "30px",
+      boxShadow: "0px 4px 20px rgba(255, 193, 7, 0.5)", // More pronounced shadow
+      textTransform: "none",
+      transition: "all 0.2s ease-in-out",
+      '&:hover': {
+        transform: "scale(1.05)",
+        boxShadow: "0px 6px 15px rgba(255, 193, 7, 0.6)",
+        background: "linear-gradient(135deg, #FF9800 0%, #FFC107 100%)",
+      },
+      alignSelf: 'center',
+      mt: 3, // Increased margin top
+      mb: 2, // Added margin bottom
+      fontSize: { xs: '0.9rem', sm: '1rem' }, // Larger font
+      minWidth: '200px', // Ensure minimum width
+    }}
+  >
+    🎯 Tailor My Resume
+  </Button>
+)}
 
           {chatEnded && (
             <Button

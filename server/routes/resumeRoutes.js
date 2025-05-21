@@ -177,4 +177,70 @@ router.use((err, req, res, next) => {
   next();
 });
 
+// ✅ New Route: Tailor Resume with File Upload
+router.post(
+  "/tailor-resume-with-file",
+  upload.single("resume"),
+  async (req, res) => {
+    try {
+      if (!req.file || !req.body.jobDescription) {
+        return res
+          .status(400)
+          .json({ error: "Resume file and job description are required!" });
+      }
+
+      // Get client IP as identifier
+      const identifier = req.ip || req.connection.remoteAddress;
+
+      // Check if user is rate limited (reusing the same rate limit as analyze-resume)
+      if (rateLimitService.isRateLimited(identifier)) {
+        const timeRemaining =
+          rateLimitService.getCooldownTimeRemaining(identifier);
+        return res.status(429).json({
+          error: "Rate limit exceeded",
+          message: `You can tailor another resume in ${timeRemaining} minutes.`,
+          cooldownMinutes: timeRemaining,
+        });
+      }
+
+      // Extract text from uploaded resume
+      console.log("✅ Resume Uploaded for tailoring:", req.file.path);
+      const resumeData = await parseResume(req.file.path);
+
+      if (!resumeData || resumeData.error) {
+        return res.status(500).json({ error: "Failed to extract resume data" });
+      }
+
+      // Get the full text from the PDF
+      const resumeText = await extractTextFromPDF(req.file.path);
+      if (!resumeText) {
+        return res
+          .status(500)
+          .json({ error: "Failed to extract text from PDF" });
+      }
+
+      const jobDescription = req.body.jobDescription;
+
+      // Generate tailored resume bullet points
+      const tailoredResume = await generateTailoredResume(
+        resumeText,
+        jobDescription
+      );
+
+      // Record this usage to apply rate limiting
+      rateLimitService.recordUsage(identifier);
+
+      // If there was an error generating tailored resume
+      if (tailoredResume.error) {
+        return res.status(500).json({ error: tailoredResume.error });
+      }
+
+      res.json(tailoredResume);
+    } catch (error) {
+      console.error("❌ Error tailoring resume with file:", error);
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
+);
+
 module.exports = router;

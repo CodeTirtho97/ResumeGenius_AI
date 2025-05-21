@@ -294,7 +294,16 @@ function App() {
 
   const extractResumeText = async (file) => {
     if (!file) return "Your resume text here";
-    return `Resume content for ${file.name}`;
+    
+    try {
+      // We already have the resume text from the file uploaded in handleFileChange
+      // The backend has already parsed it in the analyze-resume endpoint
+      // We can use the same file and let the backend extract the text again
+      return "RESUME_CONTENT_PLACEHOLDER"; // This placeholder will be ignored by the backend
+    } catch (error) {
+      console.error("Error extracting resume text:", error);
+      return null;
+    }
   };
 
   const handleTailorResume = async () => {
@@ -308,17 +317,22 @@ function App() {
         processingText: "Generating tailored resume bullet points...",
       },
     ]);
-
+  
     try {
-      const resumeText = await extractResumeText(file);
-      const response = await fetch(`${BACKEND_URL}/api/resume/tailor-resume`, {
+      // Instead of trying to extract text from the file in the frontend
+      // We'll send the original file in a FormData object to let the backend handle it
+      const formData = new FormData();
+      formData.append("resume", file);
+      formData.append("jobDescription", jobDescription);
+  
+      // Call a new endpoint that can handle both the resume file and job description
+      const response = await fetch(`${BACKEND_URL}/api/resume/tailor-resume-with-file`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ resumeText, jobDescription }),
+        body: formData,
       });
-
+  
       const data = await response.json();
-
+  
       if (data.tailoredBullets) {
         setTailoredBullets(data.tailoredBullets);
         setMessages((prev) => [

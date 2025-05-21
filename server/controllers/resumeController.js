@@ -859,4 +859,5 @@ module.exports = {
   compareResumeWithJobDescription,
   getAiSuggestions,
   generateTailoredResume,
+  extractTextFromPDF, // Add this export
 };

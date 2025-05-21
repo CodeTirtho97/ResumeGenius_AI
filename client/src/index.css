@@ -510,7 +510,7 @@ textarea::placeholder {
 
 /* === 💫 Text Effects === */
 .text-gradient {
-  background: linear-gradient(90deg, #00E0FF, #06d6a0);
+  background: linear-gradient(90deg, #228f9d, #03a57a);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -522,7 +522,7 @@ textarea::placeholder {
 
 /* === 🎨 Color Variables === */
 :root {
-  --primary-blue: #00E0FF;
+  --primary-blue: #2cbacd;
   --primary-green: #06d6a0;
   --dark-blue-bg: #0A192F;
   --darker-blue-bg: #102A43;

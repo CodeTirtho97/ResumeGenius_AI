@@ -59,7 +59,7 @@ const InfoPanel = () => {
           mb: 1
         }}
       >
-        <FaInfoCircle style={{ color: '#00E0FF' }} /> Info Panel
+        <FaInfoCircle style={{ color: '#219ebc' }} /> Info Panel
       </Typography>
       
       {/* How to Use - Always open */}
@@ -79,7 +79,7 @@ const InfoPanel = () => {
         }}
       >
         <AccordionSummary
-          expandIcon={expanded === 'howToUse' ? <FaChevronUp color="#00E0FF" /> : <FaChevronDown color="#00E0FF" />}
+          expandIcon={expanded === 'howToUse' ? <FaChevronUp color="#219ebc" /> : <FaChevronDown color="#219ebc" />}
           sx={{ 
             padding: '0 12px',
             minHeight: '48px',
@@ -110,16 +110,16 @@ const InfoPanel = () => {
             color: '#E0E0E0',
             listStyleType: 'none',
           }}>
-            <li className="info-list-item" style={{ marginBottom: '10px', display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
-              <span className="info-list-bullet" style={{ color: '#00E0FF', minWidth: '8px' }}>•</span> 
+            <li className="info-list-item" style={{ marginBottom: '10px', display: 'flex', alignItems: 'flex-center', gap: '10px' }}>
+              <span className="info-list-bullet" style={{ color: '#219ebc', minWidth: '8px' }}>•</span> 
               <span>Upload your resume (PDF only).</span>
             </li>
-            <li className="info-list-item" style={{ marginBottom: '10px', display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
-              <span className="info-list-bullet" style={{ color: '#00E0FF', minWidth: '8px' }}>•</span> 
+            <li className="info-list-item" style={{ marginBottom: '10px', display: 'flex', alignItems: 'flex-center', gap: '10px' }}>
+              <span className="info-list-bullet" style={{ color: '#219ebc', minWidth: '8px' }}>•</span> 
               <span>Provide a job description to analyze match score.</span>
             </li>
-            <li className="info-list-item" style={{ marginBottom: '10px', display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
-              <span className="info-list-bullet" style={{ color: '#00E0FF', minWidth: '8px' }}>•</span> 
+            <li className="info-list-item" style={{ marginBottom: '10px', display: 'flex', alignItems: 'flex-center', gap: '10px' }}>
+              <span className="info-list-bullet" style={{ color: '#219ebc', minWidth: '8px' }}>•</span> 
               <span>Receive AI suggestions for resume improvements.</span>
             </li>
           </ul>
@@ -143,7 +143,7 @@ const InfoPanel = () => {
         }}
       >
         <AccordionSummary
-          expandIcon={expanded === 'aiAnalysis' ? <FaChevronUp color="#00E0FF" /> : <FaChevronDown color="#00E0FF" />}
+          expandIcon={expanded === 'aiAnalysis' ? <FaChevronUp color="#219ebc" /> : <FaChevronDown color="#219ebc" />}
           sx={{ 
             padding: '0 12px',
             minHeight: '48px',
@@ -163,7 +163,7 @@ const InfoPanel = () => {
               fontWeight: 600
             }}
           >
-            <FaSearchPlus style={{ color: '#00E0FF' }} /> AI-Powered Analysis:
+            <FaSearchPlus style={{ color: '#219ebc' }} /> AI-Powered Analysis:
           </Typography>
         </AccordionSummary>
         <AccordionDetails sx={{ padding: '0 12px 16px 12px' }}>
@@ -207,7 +207,7 @@ const InfoPanel = () => {
         }}
       >
         <AccordionSummary
-          expandIcon={expanded === 'privacy' ? <FaChevronUp color="#00E0FF" /> : <FaChevronDown color="#00E0FF" />}
+          expandIcon={expanded === 'privacy' ? <FaChevronUp color="#219ebc" /> : <FaChevronDown color="#219ebc" />}
           sx={{ 
             padding: '0 12px',
             minHeight: '48px',

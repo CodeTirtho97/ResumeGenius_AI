@@ -778,16 +778,16 @@ function App() {
             </Button>
           )}
 
-{messages[messages.length - 1].showTailorButton && (
+{messages.some(msg => msg.showTailorButton) && (
   <Button
     onClick={handleTailorResume}
     sx={{
       background: "linear-gradient(135deg, #FFC107 0%, #FF9800 100%)",
       color: "#0A1929",
       fontWeight: "bold",
-      padding: { xs: '12px 20px', sm: '12px 24px' }, // Larger padding
+      padding: { xs: '12px 20px', sm: '12px 24px' },
       borderRadius: "30px",
-      boxShadow: "0px 4px 20px rgba(255, 193, 7, 0.5)", // More pronounced shadow
+      boxShadow: "0px 4px 20px rgba(255, 193, 7, 0.5)",
       textTransform: "none",
       transition: "all 0.2s ease-in-out",
       '&:hover': {
@@ -796,10 +796,10 @@ function App() {
         background: "linear-gradient(135deg, #FF9800 0%, #FFC107 100%)",
       },
       alignSelf: 'center',
-      mt: 3, // Increased margin top
-      mb: 2, // Added margin bottom
-      fontSize: { xs: '0.9rem', sm: '1rem' }, // Larger font
-      minWidth: '200px', // Ensure minimum width
+      mt: 3,
+      mb: 2,
+      fontSize: { xs: '0.9rem', sm: '1rem' },
+      minWidth: '200px',
     }}
   >
     🎯 Tailor My Resume
@@ -846,100 +846,146 @@ function App() {
       </Box>
 
       <Modal
-        open={showJobModal}
-        onClose={() => setShowJobModal(false)}
+  open={showJobModal}
+  onClose={() => setShowJobModal(false)}
+  sx={{
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    backdropFilter: "blur(6px)", 
+  }}
+>
+  <motion.div
+    initial={{ opacity: 0, scale: 0.9 }}
+    animate={{ opacity: 1, scale: 1 }}
+    transition={{ duration: 0.3 }}
+    style={{
+      background: "#1E1E1E", 
+      padding: "30px",
+      borderRadius: "16px",
+      width: "650px", // Increased from 420px
+      maxWidth: "90vw", // Added for responsiveness
+      boxShadow: "0px 8px 30px rgba(0, 224, 255, 0.3)", // Enhanced shadow
+      border: "1px solid rgba(0, 224, 255, 0.2)", // Added subtle border
+    }}
+  >
+    <Typography
+      variant="h4" // Increased from h5
+      fontWeight="bold"
+      sx={{
+        color: "#00E0FF",
+        textAlign: "center",
+        marginBottom: "20px", // Increased from 15px
+        fontFamily: "'Poppins', sans-serif",
+        textShadow: "0px 3px 8px rgba(0, 224, 255, 0.5)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: "10px",
+      }}
+    >
+      <span style={{ fontSize: "28px" }}>📄</span> Paste Job Description
+    </Typography>
+
+    {/* Optional subtitle for added context */}
+    <Typography 
+      variant="body1" 
+      sx={{ 
+        color: "#BBBBBB", 
+        textAlign: "center", 
+        marginBottom: "25px",
+        fontFamily: "'Poppins', sans-serif",
+      }}
+    >
+      For best results, include all skills and requirements from the job posting
+    </Typography>
+
+    <TextField
+      fullWidth
+      multiline
+      rows={8} // Increased from 4
+      placeholder="Paste the complete job description here to get accurate ATS matching score and AI recommendations..."
+      onChange={(e) => setJobDescription(e.target.value)}
+      InputProps={{
+        sx: {
+          background: "#252836", // Slightly lighter than modal bg
+          color: "#E0E0E0",
+          borderRadius: "12px", // Increased from 8px
+          padding: "16px", // Increased from 12px
+          caretColor: "#00E0FF",
+          fontSize: "15px", // Increased from 14px
+          fontFamily: "'Poppins', sans-serif",
+          "&::placeholder": { color: "#8FA3BF", opacity: 1 },
+        },
+      }}
+      sx={{
+        "& .MuiOutlinedInput-root": {
+          "& fieldset": { 
+            borderColor: "rgba(0, 224, 255, 0.3)",
+            borderWidth: "2px", // Increased from default
+          },
+          "&:hover fieldset": { 
+            borderColor: "#06d6a0",
+            borderWidth: "2px",
+          },
+          "&.Mui-focused fieldset": {
+            borderColor: "#06d6a0",
+            boxShadow: "0px 0px 12px rgba(0, 224, 255, 0.6)",
+            borderWidth: "2px",
+          },
+        },
+      }}
+    />
+
+    <Box sx={{ display: "flex", gap: "15px", marginTop: "25px" }}>
+      {/* Added Cancel button */}
+      <Button
+        variant="outlined"
+        onClick={() => setShowJobModal(false)}
         sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          backdropFilter: "blur(8px)",
-          backgroundColor: "rgba(0, 0, 0, 0.5)",
+          padding: "14px",
+          flex: "1",
+          fontWeight: "bold",
+          fontSize: "15px",
+          borderRadius: "12px",
+          border: "2px solid rgba(255, 87, 51, 0.7)",
+          color: "#FF5733",
+          textTransform: "none",
+          transition: "all 0.3s ease-in-out",
+          "&:hover": {
+            backgroundColor: "rgba(255, 87, 51, 0.1)",
+            borderColor: "#FF5733",
+          },
         }}
       >
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.3 }}
-          style={{
-            background: "#121E2E",
-            padding: "25px",
-            borderRadius: "16px",
-            width: "90%",
-            maxWidth: "420px",
-            boxShadow: "0px 8px 20px rgba(0, 224, 255, 0.2)",
-            border: "1px solid rgba(0, 224, 255, 0.2)",
-          }}
-        >
-          <Typography
-            variant="h5"
-            fontWeight="bold"
-            sx={{
-              color: "#00E0FF",
-              textAlign: "center",
-              marginBottom: "15px",
-              fontFamily: "'Inter', sans-serif",
-              textShadow: "0px 3px 8px rgba(0, 224, 255, 0.3)",
-              fontSize: { xs: "1.2rem", sm: "1.4rem" },
-            }}
-          >
-            📄 Paste Job Description
-          </Typography>
-          <TextField
-            fullWidth
-            multiline
-            rows={4}
-            placeholder="Paste Job Description..."
-            onChange={(e) => setJobDescription(e.target.value)}
-            InputProps={{
-              sx: {
-                background: "rgba(10, 25, 41, 0.7)",
-                color: "#E0E0E0",
-                borderRadius: "10px",
-                padding: "12px",
-                caretColor: "#00E0FF",
-                fontSize: "0.9rem",
-                fontFamily: "'Inter', sans-serif",
-                "&::placeholder": { color: "#8FA3BF", opacity: 1 },
-              },
-            }}
-            sx={{
-              "& .MuiOutlinedInput-root": {
-                "& fieldset": { borderColor: "rgba(0, 224, 255, 0.3)" },
-                "&:hover fieldset": { borderColor: "rgba(0, 224, 255, 0.5)" },
-                "&.Mui-focused fieldset": {
-                  borderColor: "#00E0FF",
-                  boxShadow: "0px 0px 12px rgba(0, 224, 255, 0.3)",
-                },
-              },
-            }}
-          />
-          <Button
-            variant="contained"
-            onClick={handleJobDescriptionSubmit}
-            sx={{
-              marginTop: "20px",
-              width: "100%",
-              padding: "14px",
-              fontWeight: "bold",
-              fontSize: "0.9rem",
-              borderRadius: "10px",
-              background: "linear-gradient(135deg, #00E0FF 0%, #06d6a0 100%)",
-              boxShadow: "0px 4px 10px rgba(0, 224, 255, 0.3)",
-              textTransform: "none",
-              transition: "all 0.3s ease-in-out",
-              "&:hover": {
-                transform: "scale(1.03)",
-                boxShadow: "0px 6px 15px rgba(0, 224, 255, 0.4)",
-                background: "linear-gradient(135deg, #06d6a0 0%, #00E0FF 100%)",
-              },
-              color: "#0A1929",
-              letterSpacing: "0.5px",
-            }}
-          >
-            🚀 Submit
-          </Button>
-        </motion.div>
-      </Modal>
+        Cancel
+      </Button>
+
+      <Button
+        variant="contained"
+        onClick={handleJobDescriptionSubmit}
+        sx={{
+          padding: "14px",
+          flex: "2",
+          fontWeight: "bold",
+          fontSize: "15px",
+          borderRadius: "12px",
+          background: "linear-gradient(135deg, #00E0FF 0%, #06d6a0 100%)",
+          boxShadow: "0px 4px 10px rgba(0, 224, 255, 0.3)",
+          textTransform: "none",
+          transition: "all 0.3s ease-in-out",
+          "&:hover": {
+            transform: "translateY(-2px)",
+            boxShadow: "0px 6px 15px rgba(0, 224, 255, 0.4)",
+            background: "linear-gradient(135deg, #06d6a0 0%, #00E0FF 100%)",
+          },
+        }}
+      >
+        🚀 Submit and Analyze
+      </Button>
+    </Box>
+  </motion.div>
+</Modal>
 
       <Modal
         open={showCooldownModal}

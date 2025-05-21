@@ -53,7 +53,7 @@ const InfoPanel = () => {
           display: "flex",
           alignItems: "center",
           gap: 1,
-          color: 'white', // Changed to white for better visibility
+          color: 'white',
           fontSize: { xs: '1.1rem', sm: '1.2rem' },
           padding: "0 10px",
           mb: 1
@@ -79,10 +79,12 @@ const InfoPanel = () => {
         }}
       >
         <AccordionSummary
-          expandIcon={expanded === 'howToUse' ? <FaChevronUp color="#219ebc" /> : <FaChevronDown color="#219ebc" />}
+          expandIcon={expanded === 'howToUse' ? <FaChevronUp color="#FFD166" /> : <FaChevronDown color="#FFD166" />}
           sx={{ 
             padding: '0 12px',
             minHeight: '48px',
+            background: 'linear-gradient(90deg, #1E3A5F 0%, #2D6A9F 100%)', // Darker blue gradient
+            borderRadius: '10px',
             '& .MuiAccordionSummary-content': {
               margin: '10px 0'
             }
@@ -99,7 +101,7 @@ const InfoPanel = () => {
               fontWeight: 600
             }}
           >
-            <FaRocket style={{ color: '#FF9800' }} /> How to Use:
+            <FaRocket style={{ color: '#FFD166' }} /> How to Use:
           </Typography>
         </AccordionSummary>
         <AccordionDetails sx={{ padding: '0 12px 16px 12px' }}>
@@ -143,10 +145,12 @@ const InfoPanel = () => {
         }}
       >
         <AccordionSummary
-          expandIcon={expanded === 'aiAnalysis' ? <FaChevronUp color="#219ebc" /> : <FaChevronDown color="#219ebc" />}
+          expandIcon={expanded === 'aiAnalysis' ? <FaChevronUp color="#FFD166" /> : <FaChevronDown color="#FFD166" />}
           sx={{ 
             padding: '0 12px',
             minHeight: '48px',
+            background: 'linear-gradient(90deg, #263859 0%, #3A6291 100%)', // Slightly lighter shade
+            borderRadius: '10px',
             '& .MuiAccordionSummary-content': {
               margin: '10px 0'
             }
@@ -163,7 +167,7 @@ const InfoPanel = () => {
               fontWeight: 600
             }}
           >
-            <FaSearchPlus style={{ color: '#219ebc' }} /> AI-Powered Analysis:
+            <FaSearchPlus style={{ color: '#FFD166' }} /> AI-Powered Analysis:
           </Typography>
         </AccordionSummary>
         <AccordionDetails sx={{ padding: '0 12px 16px 12px' }}>
@@ -207,10 +211,12 @@ const InfoPanel = () => {
         }}
       >
         <AccordionSummary
-          expandIcon={expanded === 'privacy' ? <FaChevronUp color="#219ebc" /> : <FaChevronDown color="#219ebc" />}
+          expandIcon={expanded === 'privacy' ? <FaChevronUp color="#FFD166" /> : <FaChevronDown color="#FFD166" />}
           sx={{ 
             padding: '0 12px',
             minHeight: '48px',
+            background: 'linear-gradient(90deg, #2B3252 0%, #4A5788 100%)', // Darkest shade
+            borderRadius: '10px',
             '& .MuiAccordionSummary-content': {
               margin: '10px 0'
             }
@@ -220,14 +226,14 @@ const InfoPanel = () => {
             className="section-title-privacy accordion-header"
             sx={{
               fontSize: { xs: '0.95rem', sm: '1rem' },
-              color: 'white', // Changed from yellow for better visibility
+              color: 'white',
               display: 'flex',
               alignItems: 'center',
               gap: 1,
               fontWeight: 600
             }}
           >
-            <FaLock style={{ color: '#FFC107' }} /> Data Privacy & Usage:
+            <FaLock style={{ color: '#FFD166' }} /> Data Privacy & Usage:
           </Typography>
         </AccordionSummary>
         <AccordionDetails sx={{ padding: '0 12px 16px 12px' }}>

@@ -58,6 +58,7 @@ function App() {
   const [matchedSkills, setMatchedSkills] = useState([]);
   const [missingSkills, setMissingSkills] = useState([]);
   const [tailoredBullets, setTailoredBullets] = useState([]);
+  const [tailoringCompleted, setTailoringCompleted] = useState(false);
 
   const [rateLimitStatus, setRateLimitStatus] = useState({
     analyze: { used: 0, limit: 5, remaining: 5, isLimited: false },
@@ -128,6 +129,10 @@ function App() {
         setMessages((prev) => [...prev, { sender: "bot", text: "⚠️ Please upload a resume and provide a job description." }]);
         return;
     }
+
+    // Reset tailoring state when analyzing a new resume
+    setTailoringCompleted(false);
+    setTailoredBullets([]);
 
     // Check if user can analyze more resumes
     if (rateLimitStatus.analyze.isLimited) {
@@ -226,7 +231,7 @@ function App() {
                 { 
                     sender: "bot", 
                     text: tailorMessage,
-                    showTailorButton: canTailor
+                    showTailorButton: canTailor && !tailoringCompleted // FIXED: Check if tailoring is completed
                 }
             ]);
         }, 300);
@@ -423,6 +428,7 @@ const handleAiSuggestionRequest = async () => {
 
         if (data.tailoredBullets) {
             setTailoredBullets(data.tailoredBullets);
+            setTailoringCompleted(true); // FIXED: Mark tailoring as completed
             
             const updatedStatus = data.rateLimitStatus || rateLimitStatus;
             const canGetSuggestions = !updatedStatus.suggestions.isLimited && updatedStatus.suggestions.remaining > 0;
@@ -452,9 +458,16 @@ const handleAiSuggestionRequest = async () => {
                 sender: "bot",
                 text: "❌ Sorry, I couldn't generate tailored bullet points. Please try again.",
             },
+            // Show AI suggestions option even if tailoring fails
+            {
+                sender: "bot",
+                text: "Would you like AI-powered suggestions to improve your resume?",
+                aiSuggestionRequest: !rateLimitStatus.suggestions.isLimited && rateLimitStatus.suggestions.remaining > 0,
+            },
         ]);
     }
 };
+
 
   const handleFileChange = (e) => {
     const uploadedFile = e.target.files[0];
@@ -496,17 +509,21 @@ const handleAiSuggestionRequest = async () => {
   const handleStartNewChat = () => {
     const lastTimestamp = localStorage.getItem("lastChatTimestamp");
     if (lastTimestamp) {
-      const lastTime = new Date(lastTimestamp);
-      const currentTime = new Date();
-      const timeDiff = (currentTime - lastTime) / (1000 * 60);
-      if (timeDiff < 60) {
-        setShowCooldownModal(true);
-        setCooldownMinutes(Math.ceil(60 - timeDiff));
-        return;
-      }
+        const lastTime = new Date(lastTimestamp);
+        const currentTime = new Date();
+        const timeDiff = (currentTime - lastTime) / (1000 * 60);
+        if (timeDiff < 60) {
+            setShowCooldownModal(true);
+            setCooldownMinutes(Math.ceil(60 - timeDiff));
+            return;
+        }
     }
+    
+    // Reset all states including tailoring
+    setTailoringCompleted(false);
+    setTailoredBullets([]);
     window.location.reload();
-  };
+};
 
   return (
     <Box
@@ -877,7 +894,7 @@ const handleAiSuggestionRequest = async () => {
             </Button>
           )}
 
-{messages.some(msg => msg.showTailorButton) && (
+{messages.some(msg => msg.showTailorButton) && !tailoringCompleted && (
   <Button
     onClick={handleTailorResume}
     sx={{

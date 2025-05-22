@@ -953,6 +953,7 @@ const handleAiSuggestionRequest = async () => {
     alignItems: "center",
     backdropFilter: "blur(8px)",
     backgroundColor: "rgba(10, 25, 41, 0.8)",
+    padding: "20px", // Add padding to prevent modal from touching screen edges
   }}
 >
   <motion.div
@@ -964,8 +965,9 @@ const handleAiSuggestionRequest = async () => {
       background: "linear-gradient(145deg, #1A1F2E 0%, #16213E 100%)",
       padding: "0",
       borderRadius: "20px",
-      width: "min(90vw, 700px)",
-      maxHeight: "85vh",
+      width: "min(95vw, 900px)", // Increased width
+      maxWidth: "900px",
+      maxHeight: "90vh", // Increased height
       overflow: "hidden",
       boxShadow: `
         0 25px 50px -12px rgba(0, 0, 0, 0.8),
@@ -973,16 +975,20 @@ const handleAiSuggestionRequest = async () => {
         inset 0 1px 0 rgba(255, 255, 255, 0.05)
       `,
       position: "relative",
+      display: "flex",
+      flexDirection: "column",
     }}
   >
-    {/* Header Section */}
+    {/* Header Section - CENTERED AND NO CLOSE BUTTON */}
     <Box
       sx={{
         background: "linear-gradient(135deg, #0A192F 0%, #1E3A5F 100%)",
-        padding: "25px 30px",
+        padding: { xs: "25px 25px", sm: "30px 35px" }, // Centered padding
         borderBottom: "1px solid rgba(0, 224, 255, 0.2)",
         position: "relative",
         overflow: "hidden",
+        flexShrink: 0, // Prevent header from shrinking
+        textAlign: "center", // Center align content
       }}
     >
       {/* Animated background elements */}
@@ -1001,30 +1007,31 @@ const handleAiSuggestionRequest = async () => {
         }}
       />
       
-      <Box sx={{ position: "relative", zIndex: 2 }}>
+      <Box sx={{ position: "relative", zIndex: 2, display: "flex", flexDirection: "column", alignItems: "center" }}>
         <Typography
           variant="h4"
           sx={{
             color: "#FFFFFF",
             fontWeight: 700,
-            fontSize: { xs: "1.5rem", sm: "1.8rem" },
+            fontSize: { xs: "1.4rem", sm: "1.8rem", md: "2rem" },
             marginBottom: "8px",
             display: "flex",
             alignItems: "center",
+            justifyContent: "center", // Center the content
             gap: "12px",
             fontFamily: "'Inter', sans-serif",
           }}
         >
           <Box
             sx={{
-              width: "50px",
-              height: "50px",
+              width: { xs: "45px", sm: "50px" },
+              height: { xs: "45px", sm: "50px" },
               background: "linear-gradient(135deg, #00E0FF 0%, #06d6a0 100%)",
               borderRadius: "12px",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              fontSize: "24px",
+              fontSize: { xs: "20px", sm: "24px" },
               boxShadow: "0 8px 25px rgba(0, 224, 255, 0.3)",
             }}
           >
@@ -1037,50 +1044,33 @@ const handleAiSuggestionRequest = async () => {
           variant="body1"
           sx={{
             color: "rgba(255, 255, 255, 0.7)",
-            fontSize: "1rem",
+            fontSize: { xs: "0.9rem", sm: "1rem" },
             fontWeight: 400,
-            marginLeft: "62px", // Align with title after icon
+            textAlign: "center", // Center align subtitle
           }}
         >
           Paste the complete job posting for accurate ATS analysis
         </Typography>
       </Box>
-      
-      {/* Close button */}
-      <IconButton
-        onClick={() => setShowJobModal(false)}
-        sx={{
-          position: "absolute",
-          top: "20px",
-          right: "20px",
-          width: "40px",
-          height: "40px",
-          backgroundColor: "rgba(255, 255, 255, 0.1)",
-          backdropFilter: "blur(10px)",
-          border: "1px solid rgba(255, 255, 255, 0.1)",
-          color: "rgba(255, 255, 255, 0.7)",
-          transition: "all 0.2s ease",
-          "&:hover": {
-            backgroundColor: "rgba(255, 87, 87, 0.2)",
-            color: "#FF5757",
-            borderColor: "rgba(255, 87, 87, 0.3)",
-            transform: "scale(1.05)",
-          },
-        }}
-      >
-        <FaTimes />
-      </IconButton>
     </Box>
 
-    {/* Content Section */}
-    <Box sx={{ padding: "30px" }}>
+    {/* Content Section - MADE SCROLLABLE */}
+    <Box 
+      sx={{ 
+        padding: { xs: "25px", sm: "35px" },
+        flex: 1,
+        overflow: "auto",
+        display: "flex",
+        flexDirection: "column",
+        gap: "25px",
+      }}
+    >
       {/* Instructions Cards */}
       <Box
         sx={{
           display: "grid",
           gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
           gap: "15px",
-          marginBottom: "25px",
         }}
       >
         <Box
@@ -1104,6 +1094,7 @@ const handleAiSuggestionRequest = async () => {
               alignItems: "center",
               justifyContent: "center",
               fontSize: "16px",
+              flexShrink: 0,
             }}
           >
             🎯
@@ -1139,6 +1130,7 @@ const handleAiSuggestionRequest = async () => {
               alignItems: "center",
               justifyContent: "center",
               fontSize: "16px",
+              flexShrink: 0,
             }}
           >
             📊
@@ -1154,12 +1146,12 @@ const handleAiSuggestionRequest = async () => {
         </Box>
       </Box>
 
-      {/* Enhanced Textarea */}
-      <Box sx={{ position: "relative", marginBottom: "25px" }}>
+      {/* Enhanced Textarea - FIXED PADDING ISSUE */}
+      <Box sx={{ position: "relative", flex: 1, minHeight: "300px" }}>
         <TextField
           fullWidth
           multiline
-          rows={10}
+          rows={12} // Increased rows for better visibility
           placeholder="Paste the complete job description here...
 
 Example:
@@ -1180,7 +1172,7 @@ Example:
               fontSize: "15px",
               fontFamily: "'Inter', sans-serif",
               lineHeight: 1.6,
-              padding: "20px",
+              padding: "0", // REMOVED PADDING - This was causing the issue!
               transition: "all 0.3s ease",
               "&:hover": {
                 borderColor: "rgba(0, 224, 255, 0.4)",
@@ -1192,6 +1184,7 @@ Example:
                 boxShadow: "0 0 25px rgba(0, 224, 255, 0.2)",
               },
               "& .MuiInputBase-input": {
+                padding: "20px !important", // Apply padding only to the actual input
                 "&::placeholder": {
                   color: "rgba(255, 255, 255, 0.4)",
                   opacity: 1,
@@ -1205,6 +1198,7 @@ Example:
                 border: "none",
               },
             },
+            height: "100%",
           }}
         />
         
@@ -1212,26 +1206,69 @@ Example:
         <Typography
           sx={{
             position: "absolute",
-            bottom: "10px",
-            right: "15px",
+            bottom: "15px",
+            right: "20px",
             color: "rgba(255, 255, 255, 0.4)",
             fontSize: "0.75rem",
             background: "rgba(10, 25, 41, 0.8)",
             padding: "4px 8px",
             borderRadius: "6px",
             backdropFilter: "blur(5px)",
+            pointerEvents: "none", // Prevent interference with textarea
           }}
         >
           {jobDescription.length} characters
         </Typography>
       </Box>
 
-      {/* Action Buttons */}
+      {/* Pro Tip - MOVED ABOVE BUTTONS */}
+      <Box
+        sx={{
+          padding: "15px",
+          background: "rgba(255, 193, 7, 0.05)",
+          border: "1px solid rgba(255, 193, 7, 0.2)",
+          borderRadius: "10px",
+          display: "flex",
+          alignItems: "flex-start",
+          gap: "10px",
+        }}
+      >
+        <Box
+          sx={{
+            width: "30px",
+            height: "30px",
+            background: "rgba(255, 193, 7, 0.2)",
+            borderRadius: "50%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: "14px",
+            flexShrink: 0,
+            marginTop: "2px",
+          }}
+        >
+          💡
+        </Box>
+        <Typography
+          sx={{
+            color: "rgba(255, 255, 255, 0.8)",
+            fontSize: "0.85rem",
+            lineHeight: 1.5,
+          }}
+        >
+          <strong style={{ color: "#FFC107" }}>Pro Tip:</strong> Include the complete job posting with requirements, 
+          responsibilities, and qualifications for the most accurate ATS matching score.
+        </Typography>
+      </Box>
+
+      {/* Action Buttons - FIXED POSITIONING */}
       <Box
         sx={{
           display: "flex",
           gap: "15px",
           flexDirection: { xs: "column", sm: "row" },
+          flexShrink: 0, // Prevent buttons from shrinking
+          paddingTop: "10px",
         }}
       >
         <Button
@@ -1313,45 +1350,6 @@ Example:
         >
           {jobDescription.trim() ? "Analyze Resume Match" : "Enter Job Description"}
         </Button>
-      </Box>
-
-      {/* Bottom Info */}
-      <Box
-        sx={{
-          marginTop: "20px",
-          padding: "15px",
-          background: "rgba(255, 193, 7, 0.05)",
-          border: "1px solid rgba(255, 193, 7, 0.2)",
-          borderRadius: "10px",
-          display: "flex",
-          alignItems: "center",
-          gap: "10px",
-        }}
-      >
-        <Box
-          sx={{
-            width: "30px",
-            height: "30px",
-            background: "rgba(255, 193, 7, 0.2)",
-            borderRadius: "50%",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: "14px",
-          }}
-        >
-          💡
-        </Box>
-        <Typography
-          sx={{
-            color: "rgba(255, 255, 255, 0.8)",
-            fontSize: "0.85rem",
-            lineHeight: 1.5,
-          }}
-        >
-          <strong style={{ color: "#FFC107" }}>Pro Tip:</strong> Include the complete job posting with requirements, 
-          responsibilities, and qualifications for the most accurate ATS matching score.
-        </Typography>
       </Box>
     </Box>
   </motion.div>

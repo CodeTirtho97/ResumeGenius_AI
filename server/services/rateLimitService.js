@@ -1,148 +1,226 @@
-// server/services/rateLimitService.js
-const fs = require("fs");
 const path = require("path");
+const fs = require("fs");
 
-// Store rate limit data in a file
-const RATE_LIMIT_FILE = path.join(__dirname, "../data/rate_limits.json");
-const RATE_LIMIT_DIR = path.dirname(RATE_LIMIT_FILE);
-
-// Ensure directory exists
-if (!fs.existsSync(RATE_LIMIT_DIR)) {
-  fs.mkdirSync(RATE_LIMIT_DIR, { recursive: true });
-}
-
-// Initialize rate limit file if it doesn't exist
-if (!fs.existsSync(RATE_LIMIT_FILE)) {
-  fs.writeFileSync(RATE_LIMIT_FILE, JSON.stringify({}));
-}
-
-// Load rate limits data
-const loadRateLimits = () => {
-  try {
-    const data = fs.readFileSync(RATE_LIMIT_FILE, "utf8");
-    return JSON.parse(data);
-  } catch (error) {
-    console.error("❌ Error loading rate limits:", error);
-    return {};
-  }
-};
-
-// Save rate limits data
-const saveRateLimits = (data) => {
-  try {
-    fs.writeFileSync(RATE_LIMIT_FILE, JSON.stringify(data, null, 2));
-    return true;
-  } catch (error) {
-    console.error("❌ Error saving rate limits:", error);
-    return false;
-  }
-};
-
-// Check if user is rate limited
-const isRateLimited = (identifier) => {
-  const rateLimits = loadRateLimits();
-
-  // If user doesn't exist in rate limits, they're not limited
-  if (!rateLimits[identifier]) {
-    return false;
+class RateLimitService {
+  constructor() {
+    this.dataDir = path.join(__dirname, "..", "data");
+    this.rateLimitFile = path.join(this.dataDir, "rateLimit.json");
+    this.ensureDataDir();
+    this.loadRateLimitData();
   }
 
-  const lastUsage = new Date(rateLimits[identifier].lastUsage);
-  const now = new Date();
-  const hoursSinceLastUsage = (now - lastUsage) / (1000 * 60 * 60);
-
-  // Rate limited if less than 1 hour has passed
-  return hoursSinceLastUsage < 1;
-};
-
-// Get time remaining in cooldown (in minutes)
-const getCooldownTimeRemaining = (identifier) => {
-  const rateLimits = loadRateLimits();
-
-  if (!rateLimits[identifier]) {
-    return 0;
-  }
-
-  const lastUsage = new Date(rateLimits[identifier].lastUsage);
-  const now = new Date();
-  const minutesSinceLastUsage = (now - lastUsage) / (1000 * 60);
-
-  // 60 minutes cooldown
-  const remainingMinutes = 60 - minutesSinceLastUsage;
-  return remainingMinutes > 0 ? Math.ceil(remainingMinutes) : 0;
-};
-
-// Record usage for rate limiting
-const recordUsage = (identifier) => {
-  const rateLimits = loadRateLimits();
-
-  rateLimits[identifier] = {
-    lastUsage: new Date().toISOString(),
-    count: (rateLimits[identifier]?.count || 0) + 1,
-  };
-
-  return saveRateLimits(rateLimits);
-};
-
-// Clean up expired rate limits
-const cleanupExpiredRateLimits = () => {
-  const rateLimits = loadRateLimits();
-  let cleaned = 0;
-
-  const now = new Date();
-
-  Object.keys(rateLimits).forEach((identifier) => {
-    const lastUsage = new Date(rateLimits[identifier].lastUsage);
-    const hoursSinceLastUsage = (now - lastUsage) / (1000 * 60 * 60);
-
-    // Remove entries older than 24 hours
-    if (hoursSinceLastUsage > 24) {
-      delete rateLimits[identifier];
-      cleaned++;
+  ensureDataDir() {
+    if (!fs.existsSync(this.dataDir)) {
+      fs.mkdirSync(this.dataDir, { recursive: true });
     }
-  });
-
-  if (cleaned > 0) {
-    saveRateLimits(rateLimits);
-    console.log(`✅ Cleaned up ${cleaned} expired rate limit entries`);
   }
 
-  return cleaned;
-};
+  loadRateLimitData() {
+    try {
+      if (fs.existsSync(this.rateLimitFile)) {
+        const data = fs.readFileSync(this.rateLimitFile, "utf8");
+        this.rateLimitData = JSON.parse(data);
+      } else {
+        this.rateLimitData = {};
+      }
+    } catch (error) {
+      console.error("Error loading rate limit data:", error);
+      this.rateLimitData = {};
+    }
+  }
 
-// Get rate limit stats
-const getRateLimitStats = () => {
-  try {
-    const rateLimits = loadRateLimits();
-    const now = new Date();
+  saveRateLimitData() {
+    try {
+      fs.writeFileSync(
+        this.rateLimitFile,
+        JSON.stringify(this.rateLimitData, null, 2)
+      );
+    } catch (error) {
+      console.error("Error saving rate limit data:", error);
+    }
+  }
 
-    const activeUsers = Object.keys(rateLimits).filter((id) => {
-      const lastUsage = new Date(rateLimits[id].lastUsage);
-      return (now - lastUsage) / (1000 * 60 * 60) < 1; // Active in last hour
-    }).length;
+  // UPDATED: Flexible rate limits - analyze resumes vs AI API calls
+  isRateLimited(identifier, operation = "analyze") {
+    const now = Date.now();
+    const oneHour = 60 * 60 * 1000; // 1 hour in milliseconds
 
-    const totalUsers = Object.keys(rateLimits).length;
-    const totalRequests = Object.values(rateLimits).reduce(
-      (sum, user) => sum + user.count,
-      0
+    if (operation === "analyze") {
+      // For resume analysis: Check last 5 uploads in the past hour
+      return this.getUsageCount(identifier, operation, oneHour) >= 5;
+    } else {
+      // For AI operations (tailor/suggestions): Check last 2 calls in the past hour
+      return this.getUsageCount(identifier, operation, oneHour) >= 2;
+    }
+  }
+
+  // NEW: Count usage in a given time window
+  getUsageCount(identifier, operation, timeWindow) {
+    const now = Date.now();
+    const key = `${identifier}_${operation}`;
+
+    if (!this.rateLimitData[key] || !this.rateLimitData[key].usageHistory) {
+      return 0;
+    }
+
+    // Count usages within the time window
+    const recentUsages = this.rateLimitData[key].usageHistory.filter(
+      (timestamp) => now - timestamp < timeWindow
     );
 
-    return {
-      activeUsers,
-      totalUsers,
-      totalRequests,
-      timestamp: now.toISOString(),
-    };
-  } catch (error) {
-    console.error("❌ Error getting rate limit stats:", error);
-    return { error: error.message };
+    return recentUsages.length;
   }
-};
 
-module.exports = {
-  isRateLimited,
-  recordUsage,
-  getCooldownTimeRemaining,
-  cleanupExpiredRateLimits,
-  getRateLimitStats,
-};
+  // UPDATED: Different limits for different operations
+  getOperationLimits(operation) {
+    const limits = {
+      analyze: {
+        count: 5,
+        window: 60,
+        description: "5 resume analyses per hour",
+      },
+      tailor: {
+        count: 2,
+        window: 60,
+        description: "2 resume tailoring requests per hour",
+      },
+      suggestions: {
+        count: 2,
+        window: 60,
+        description: "2 AI suggestion requests per hour",
+      },
+    };
+
+    return limits[operation] || limits["analyze"];
+  }
+
+  // UPDATED: Record usage with history tracking
+  recordUsage(identifier, operation = "analyze") {
+    const now = Date.now();
+    const key = `${identifier}_${operation}`;
+
+    if (!this.rateLimitData[key]) {
+      this.rateLimitData[key] = {
+        usageHistory: [],
+        totalCount: 0,
+      };
+    }
+
+    // Add current usage to history
+    this.rateLimitData[key].usageHistory.push(now);
+    this.rateLimitData[key].totalCount =
+      (this.rateLimitData[key].totalCount || 0) + 1;
+    this.rateLimitData[key].lastUsage = now;
+
+    // Clean old entries (keep only last 24 hours for efficiency)
+    const oneDayAgo = now - 24 * 60 * 60 * 1000;
+    this.rateLimitData[key].usageHistory = this.rateLimitData[
+      key
+    ].usageHistory.filter((timestamp) => timestamp > oneDayAgo);
+
+    this.saveRateLimitData();
+  }
+
+  // UPDATED: Get time until next usage is allowed
+  getCooldownTimeRemaining(identifier, operation = "analyze") {
+    const now = Date.now();
+    const oneHour = 60 * 60 * 1000;
+    const key = `${identifier}_${operation}`;
+
+    if (!this.rateLimitData[key] || !this.rateLimitData[key].usageHistory) {
+      return 0;
+    }
+
+    const limits = this.getOperationLimits(operation);
+    const recentUsages = this.rateLimitData[key].usageHistory.filter(
+      (timestamp) => now - timestamp < oneHour
+    );
+
+    if (recentUsages.length < limits.count) {
+      return 0; // No cooldown needed
+    }
+
+    // Find the oldest usage in the current hour window
+    const oldestUsage = Math.min(...recentUsages);
+    const timeWhenOldestExpires = oldestUsage + oneHour;
+    const remainingTime = Math.max(0, timeWhenOldestExpires - now);
+
+    return Math.ceil(remainingTime / (1000 * 60)); // Return minutes
+  }
+
+  // UPDATED: Clean up expired rate limit data
+  cleanupExpiredRateLimits() {
+    const now = Date.now();
+    const twentyFourHours = 24 * 60 * 60 * 1000;
+    let cleanedCount = 0;
+
+    Object.keys(this.rateLimitData).forEach((key) => {
+      const data = this.rateLimitData[key];
+
+      if (data.usageHistory) {
+        // Clean old usage history entries
+        const originalLength = data.usageHistory.length;
+        data.usageHistory = data.usageHistory.filter(
+          (timestamp) => now - timestamp < twentyFourHours
+        );
+
+        // If no recent usage, remove the entire entry
+        if (data.usageHistory.length === 0) {
+          delete this.rateLimitData[key];
+          cleanedCount++;
+        } else if (data.usageHistory.length < originalLength) {
+          cleanedCount++;
+        }
+      } else if (data.lastUsage && now - data.lastUsage > twentyFourHours) {
+        // Legacy cleanup for old format
+        delete this.rateLimitData[key];
+        cleanedCount++;
+      }
+    });
+
+    if (cleanedCount > 0) {
+      this.saveRateLimitData();
+      console.log(`🧹 Cleaned up ${cleanedCount} expired rate limit entries`);
+    }
+  }
+
+  // UPDATED: Get usage statistics with current hour focus
+  getUsageStats(identifier) {
+    const now = Date.now();
+    const oneHour = 60 * 60 * 1000;
+
+    const stats = {
+      analyze: {
+        currentHour: this.getUsageCount(identifier, "analyze", oneHour),
+        limit: this.getOperationLimits("analyze").count,
+        remaining: Math.max(
+          0,
+          this.getOperationLimits("analyze").count -
+            this.getUsageCount(identifier, "analyze", oneHour)
+        ),
+      },
+      tailor: {
+        currentHour: this.getUsageCount(identifier, "tailor", oneHour),
+        limit: this.getOperationLimits("tailor").count,
+        remaining: Math.max(
+          0,
+          this.getOperationLimits("tailor").count -
+            this.getUsageCount(identifier, "tailor", oneHour)
+        ),
+      },
+      suggestions: {
+        currentHour: this.getUsageCount(identifier, "suggestions", oneHour),
+        limit: this.getOperationLimits("suggestions").count,
+        remaining: Math.max(
+          0,
+          this.getOperationLimits("suggestions").count -
+            this.getUsageCount(identifier, "suggestions", oneHour)
+        ),
+      },
+    };
+
+    return stats;
+  }
+}
+
+module.exports = new RateLimitService();

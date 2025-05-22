@@ -59,6 +59,12 @@ function App() {
   const [missingSkills, setMissingSkills] = useState([]);
   const [tailoredBullets, setTailoredBullets] = useState([]);
 
+  const [rateLimitStatus, setRateLimitStatus] = useState({
+    analyze: { used: 0, limit: 5, remaining: 5, isLimited: false },
+    tailor: { used: 0, limit: 2, remaining: 2, isLimited: false },
+    suggestions: { used: 0, limit: 2, remaining: 2, isLimited: false }
+  });
+
   useEffect(() => {
     const lastTimestamp = localStorage.getItem("lastChatTimestamp");
     if (lastTimestamp) {
@@ -71,6 +77,23 @@ function App() {
       }
     }
   }, []); // Added empty dependency array
+
+  const checkRateLimitStatus = async () => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/resume/rate-limit-status`);
+      if (response.ok) {
+        const status = await response.json();
+        setRateLimitStatus(status);
+      }
+    } catch (error) {
+      console.log("Could not fetch rate limit status:", error);
+    }
+  };
+  
+  // Call this on component mount
+  useEffect(() => {
+    checkRateLimitStatus();
+  }, []);
 
   const handleUserResponse = (response) => {
     setMessages((prev) => [
@@ -106,6 +129,15 @@ function App() {
         return;
     }
 
+    // Check if user can analyze more resumes
+    if (rateLimitStatus.analyze.isLimited) {
+        setMessages((prev) => [...prev, { 
+            sender: "bot", 
+            text: `⏳ You've reached the analysis limit (${rateLimitStatus.analyze.used}/${rateLimitStatus.analyze.limit} this hour). Please wait ${rateLimitStatus.analyze.timeUntilReset} minutes.`
+        }]);
+        return;
+    }
+
     setMessages((prev) => [
         ...prev,
         { sender: "user", text: "📄 Sent the Job Description" },
@@ -125,7 +157,6 @@ function App() {
             body: formData,
         });
 
-        // Handle rate limiting response
         if (response.status === 429) {
             const rateLimitData = await response.json();
             
@@ -133,12 +164,10 @@ function App() {
                 ...prev.filter(msg => !msg.showProcessingAnimation),
                 { 
                     sender: "bot", 
-                    text: `⏳ Rate limit exceeded! You can analyze another resume in ${rateLimitData.cooldownMinutes} minutes.` 
+                    text: `⏳ ${rateLimitData.message}`
                 }
             ]);
             
-            setShowCooldownModal(true);
-            setCooldownMinutes(rateLimitData.cooldownMinutes);
             setShowTyping(false);
             return;
         }
@@ -147,10 +176,13 @@ function App() {
 
         const data = await response.json();
 
+        // Update rate limit status
+        if (data.rateLimitStatus) {
+            setRateLimitStatus(data.rateLimitStatus);
+        }
+
         // Store matched skills and calculate missing skills
         setMatchedSkills(data.matchedSkills || []);
-        
-        // Extract missing skills from job description
         const missingSkills = data.extractedSkills ? 
             data.extractedSkills.filter(skill => !data.matchedSkills.includes(skill)) : [];
         setMissingSkills(missingSkills);
@@ -166,8 +198,7 @@ function App() {
             feedback = "🔴 Needs Improvement!";
         }
 
-        // CRITICAL CHANGE: Only add the ATS score and skills radar first,
-        // then add a separate message with the tailor button flag
+        // Add the ATS score and skills radar
         setMessages((prev) => [
             ...prev.filter(msg => !msg.showProcessingAnimation),
             { 
@@ -177,14 +208,25 @@ function App() {
             }
         ]);
         
-        // Add a slight delay before showing the tailor option
+        // Show usage stats and tailor option
         setTimeout(() => {
+            const updatedStatus = data.rateLimitStatus || rateLimitStatus;
+            const canTailor = !updatedStatus.tailor.isLimited && updatedStatus.tailor.remaining > 0;
+            
+            let tailorMessage = canTailor ? 
+                "Would you like me to tailor your resume for this job?" :
+                `Resume tailoring unavailable. Used ${updatedStatus.tailor.used}/${updatedStatus.tailor.limit} AI requests this hour.`;
+                
             setMessages((prev) => [
                 ...prev,
                 { 
                     sender: "bot", 
-                    text: "Would you like me to tailor your resume for this job?",
-                    showTailorButton: true 
+                    text: `📊 Usage Status: Analyzed ${updatedStatus.analyze.used}/${updatedStatus.analyze.limit} resumes, ${updatedStatus.tailor.used + updatedStatus.suggestions.used}/4 AI requests this hour.`
+                },
+                { 
+                    sender: "bot", 
+                    text: tailorMessage,
+                    showTailorButton: canTailor
                 }
             ]);
         }, 300);
@@ -198,99 +240,120 @@ function App() {
     setShowTyping(false);
 };
 
-  const handleAiSuggestionRequest = async () => {
-    setMessages((prev) => [
+const handleAiSuggestionRequest = async () => {
+  // Check rate limit before proceeding
+  if (rateLimitStatus.suggestions.isLimited || rateLimitStatus.suggestions.remaining <= 0) {
+      setMessages((prev) => [
+          ...prev,
+          { 
+              sender: "bot", 
+              text: `⏳ AI suggestions limit reached (${rateLimitStatus.suggestions.used}/${rateLimitStatus.suggestions.limit} used this hour). Try again later!`
+          }
+      ]);
+      return;
+  }
+
+  setMessages((prev) => [
       ...prev,
-      { id: `${Date.now()}-${Math.random()}`, sender: "user", text: "Yes ✅" },
+      { sender: "user", text: "Yes ✅" },
       {
-        id: `${Date.now()}-${Math.random()}`,
-        sender: "bot",
-        showProcessingAnimation: true,
-        processingText: "Fetching AI-powered resume suggestions... 🤖",
+          sender: "bot",
+          showProcessingAnimation: true,
+          processingText: "Fetching AI-powered resume suggestions... 🤖",
       },
-    ]);
+  ]);
 
-    setShowTyping(true);
+  setShowTyping(true);
 
-    try {
+  try {
       const response = await fetch(`${BACKEND_URL}/api/resume/get-suggestions`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ resumeData: file, jobDescription }),
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ resumeData: file, jobDescription }),
       });
+
+      if (response.status === 429) {
+          const rateLimitData = await response.json();
+          setMessages((prev) => [
+              ...prev.filter((msg) => !msg.showProcessingAnimation),
+              {
+                  sender: "bot",
+                  text: `⏳ ${rateLimitData.message}`,
+              },
+          ]);
+          setShowTyping(false);
+          return;
+      }
 
       const data = await response.json();
 
+      // Update rate limit status
+      if (data.rateLimitStatus) {
+          setRateLimitStatus(data.rateLimitStatus);
+      }
+
       if (!Array.isArray(data.aiSuggestions) || data.aiSuggestions.length === 0) {
-        throw new Error("Invalid AI suggestions format");
+          throw new Error("Invalid AI suggestions format");
       }
 
       let aiSuggestions = data.aiSuggestions.map((suggestion) => suggestion.trim()).filter((s) => s !== "");
       if (aiSuggestions.length > 5) {
-        aiSuggestions = aiSuggestions.slice(1, 6);
-      } else {
-        while (aiSuggestions.length < 5) {
-          aiSuggestions.push("More details can improve this section.");
-        }
-      }
-
-      let conclusionMessage = "";
-      if (data.aiSuggestions.length > 5) {
-        conclusionMessage = `<p style="margin-top: 10px; font-size: 14px; color: #780000;">
-          ${DOMPurify.sanitize(data.aiSuggestions[data.aiSuggestions.length - 1])}
-        </p>`;
+          aiSuggestions = aiSuggestions.slice(0, 5);
       }
 
       const formatTextWithStrongTags = (text) => {
-        return DOMPurify.sanitize(text.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>"));
+          return DOMPurify.sanitize(text.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>"));
       };
 
       const formattedAiSuggestions = aiSuggestions
-        .map(
-          (suggestion) => `
-        <div style="background: #2d3748; padding: 12px; border-radius: 8px; margin-bottom: 10px;">
-          <span style="color: #00FF7F;">✔️</span>
-          <span style="color: #D1D5DB;"> ${formatTextWithStrongTags(suggestion)}</span>
-        </div>
+          .map(
+              (suggestion) => `
+          <div style="background: #2d3748; padding: 12px; border-radius: 8px; margin-bottom: 10px;">
+              <span style="color: #00FF7F;">✔️</span>
+              <span style="color: #D1D5DB;"> ${formatTextWithStrongTags(suggestion)}</span>
+          </div>
       `
-        )
-        .join("");
+          )
+          .join("");
 
       const finalMessage = `
-        <div style="background-color: #ffd166; padding: 15px; border-radius: 10px; color: #780000; font-family: 'Poppins', sans-serif;">
-          <p><strong>🚀 AI-Suggested Resume Improvements</strong></p>
-          ${formattedAiSuggestions}
-          ${conclusionMessage}
-        </div>
+          <div style="background-color: #ffd166; padding: 15px; border-radius: 10px; color: #780000; font-family: 'Poppins', sans-serif;">
+              <p><strong>🚀 AI-Suggested Resume Improvements</strong></p>
+              ${formattedAiSuggestions}
+          </div>
       `;
 
+      const updatedStatus = data.rateLimitStatus || rateLimitStatus;
+      
       setMessages((prev) => [
-        ...prev.filter((msg) => !msg.showProcessingAnimation),
-        { id: `${Date.now()}-${Math.random()}`, sender: "bot", text: finalMessage },
-        {
-          id: `${Date.now()}-${Math.random()}`,
-          sender: "bot",
-          text: "🎉 Thank you for using ResumeGenius AI! Hope you'll improve and succeed in job selection! 🎯",
-        },
+          ...prev.filter((msg) => !msg.showProcessingAnimation),
+          { sender: "bot", text: finalMessage },
+          {
+              sender: "bot",
+              text: `📊 Final Usage: ${updatedStatus.analyze.used}/5 analyses, ${updatedStatus.tailor.used + updatedStatus.suggestions.used}/4 AI calls this hour.`,
+          },
+          {
+              sender: "bot",
+              text: "🎉 Thank you for using ResumeGenius AI! Hope you'll improve and succeed in job selection! 🎯",
+          },
       ]);
 
       setChatEnded(true);
       const timestamp = new Date().toISOString();
       localStorage.setItem("lastChatTimestamp", timestamp);
       setLastChatTimestamp(timestamp);
-    } catch (error) {
+  } catch (error) {
       setMessages((prev) => [
-        ...prev.filter((msg) => !msg.showProcessingAnimation),
-        {
-          id: `${Date.now()}-${Math.random()}`,
-          sender: "bot",
-          text: "⚠️ Oops! AI suggestions couldn't be fetched. Try again after a few mins!",
-        },
+          ...prev.filter((msg) => !msg.showProcessingAnimation),
+          {
+              sender: "bot",
+              text: "⚠️ Oops! AI suggestions couldn't be fetched. Try again after a few mins!",
+          },
       ]);
-    }
+  }
 
-    setShowTyping(false);
-  };
+  setShowTyping(false);
+};
 
   const extractResumeText = async (file) => {
     if (!file) return "Your resume text here";
@@ -307,69 +370,91 @@ function App() {
   };
 
   const handleTailorResume = async () => {
-    setMessages((prev) => [
-      ...prev,
-      { id: `${Date.now()}-${Math.random()}`, sender: "user", text: "🎯 Tailor my resume to this job" },
-      {
-        id: `${Date.now()}-${Math.random()}`,
-        sender: "bot",
-        showProcessingAnimation: true,
-        processingText: "Generating tailored resume bullet points...",
-      },
-    ]);
-  
-    try {
-      // Instead of trying to extract text from the file in the frontend
-      // We'll send the original file in a FormData object to let the backend handle it
-      const formData = new FormData();
-      formData.append("resume", file);
-      formData.append("jobDescription", jobDescription);
-  
-      // Call a new endpoint that can handle both the resume file and job description
-      const response = await fetch(`${BACKEND_URL}/api/resume/tailor-resume-with-file`, {
-        method: "POST",
-        body: formData,
-      });
-  
-      const data = await response.json();
-  
-      if (data.tailoredBullets) {
-        setTailoredBullets(data.tailoredBullets);
+    // Check rate limit before proceeding
+    if (rateLimitStatus.tailor.isLimited || rateLimitStatus.tailor.remaining <= 0) {
         setMessages((prev) => [
-          ...prev.filter((msg) => !msg.showProcessingAnimation),
-          {
-            id: `${Date.now()}-${Math.random()}`,
-            sender: "bot",
-            text: "✅ Here are your tailored resume bullet points:",
-          },
-          { id: `${Date.now()}-${Math.random()}`, sender: "bot", showTailoredBulletsComponent: true },
-          {
-            id: `${Date.now()}-${Math.random()}`,
-            sender: "bot",
-            text: "Would you like AI-powered suggestions to further improve your resume?",
-            aiSuggestionRequest: true,
-          },
+            ...prev,
+            { 
+                sender: "bot", 
+                text: `⏳ AI tailoring limit reached (${rateLimitStatus.tailor.used}/${rateLimitStatus.tailor.limit} used this hour). Try again later!`
+            }
         ]);
-      } else {
-        throw new Error("Failed to generate tailored bullet points");
-      }
-    } catch (error) {
-      setMessages((prev) => [
-        ...prev.filter((msg) => !msg.showProcessingAnimation),
-        {
-          id: `${Date.now()}-${Math.random()}`,
-          sender: "bot",
-          text: "❌ Sorry, I couldn't generate tailored bullet points. Please try again.",
-        },
-        {
-          id: `${Date.now()}-${Math.random()}`,
-          sender: "bot",
-          text: "Would you like AI-powered suggestions to improve your resume?",
-          aiSuggestionRequest: true,
-        },
-      ]);
+        return;
     }
-  };
+
+    setMessages((prev) => [
+        ...prev,
+        { sender: "user", text: "🎯 Tailor my resume to this job" },
+        {
+            sender: "bot",
+            showProcessingAnimation: true,
+            processingText: "Generating tailored resume bullet points...",
+        },
+    ]);
+
+    try {
+        const formData = new FormData();
+        formData.append("resume", file);
+        formData.append("jobDescription", jobDescription);
+
+        const response = await fetch(`${BACKEND_URL}/api/resume/tailor-resume-with-file`, {
+            method: "POST",
+            body: formData,
+        });
+
+        if (response.status === 429) {
+            const rateLimitData = await response.json();
+            setMessages((prev) => [
+                ...prev.filter((msg) => !msg.showProcessingAnimation),
+                {
+                    sender: "bot",
+                    text: `⏳ ${rateLimitData.message}`,
+                },
+            ]);
+            return;
+        }
+
+        const data = await response.json();
+
+        // Update rate limit status
+        if (data.rateLimitStatus) {
+            setRateLimitStatus(data.rateLimitStatus);
+        }
+
+        if (data.tailoredBullets) {
+            setTailoredBullets(data.tailoredBullets);
+            
+            const updatedStatus = data.rateLimitStatus || rateLimitStatus;
+            const canGetSuggestions = !updatedStatus.suggestions.isLimited && updatedStatus.suggestions.remaining > 0;
+            
+            setMessages((prev) => [
+                ...prev.filter((msg) => !msg.showProcessingAnimation),
+                {
+                    sender: "bot",
+                    text: "✅ Here are your tailored resume bullet points:",
+                },
+                { sender: "bot", showTailoredBulletsComponent: true },
+                {
+                    sender: "bot",
+                    text: canGetSuggestions ? 
+                        "Would you like AI-powered suggestions to further improve your resume?" :
+                        `AI suggestions unavailable. Used ${updatedStatus.suggestions.used}/${updatedStatus.suggestions.limit} suggestion requests this hour.`,
+                    aiSuggestionRequest: canGetSuggestions,
+                },
+            ]);
+        } else {
+            throw new Error("Failed to generate tailored bullet points");
+        }
+    } catch (error) {
+        setMessages((prev) => [
+            ...prev.filter((msg) => !msg.showProcessingAnimation),
+            {
+                sender: "bot",
+                text: "❌ Sorry, I couldn't generate tailored bullet points. Please try again.",
+            },
+        ]);
+    }
+};
 
   const handleFileChange = (e) => {
     const uploadedFile = e.target.files[0];
@@ -866,137 +951,408 @@ function App() {
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    backdropFilter: "blur(6px)", 
+    backdropFilter: "blur(8px)",
+    backgroundColor: "rgba(10, 25, 41, 0.8)",
   }}
 >
   <motion.div
-    initial={{ opacity: 0, scale: 0.9 }}
-    animate={{ opacity: 1, scale: 1 }}
-    transition={{ duration: 0.3 }}
+    initial={{ opacity: 0, scale: 0.9, y: 50 }}
+    animate={{ opacity: 1, scale: 1, y: 0 }}
+    exit={{ opacity: 0, scale: 0.9, y: 50 }}
+    transition={{ duration: 0.4, ease: "easeOut" }}
     style={{
-      background: "#1E1E1E", 
-      padding: "30px",
-      borderRadius: "16px",
-      width: "650px", // Increased from 420px
-      maxWidth: "90vw", // Added for responsiveness
-      boxShadow: "0px 8px 30px rgba(0, 224, 255, 0.3)", // Enhanced shadow
-      border: "1px solid rgba(0, 224, 255, 0.2)", // Added subtle border
+      background: "linear-gradient(145deg, #1A1F2E 0%, #16213E 100%)",
+      padding: "0",
+      borderRadius: "20px",
+      width: "min(90vw, 700px)",
+      maxHeight: "85vh",
+      overflow: "hidden",
+      boxShadow: `
+        0 25px 50px -12px rgba(0, 0, 0, 0.8),
+        0 0 0 1px rgba(0, 224, 255, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05)
+      `,
+      position: "relative",
     }}
   >
-    <Typography
-      variant="h4" // Increased from h5
-      fontWeight="bold"
+    {/* Header Section */}
+    <Box
       sx={{
-        color: "#00E0FF",
-        textAlign: "center",
-        marginBottom: "20px", // Increased from 15px
-        fontFamily: "'Poppins', sans-serif",
-        textShadow: "0px 3px 8px rgba(0, 224, 255, 0.5)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: "10px",
+        background: "linear-gradient(135deg, #0A192F 0%, #1E3A5F 100%)",
+        padding: "25px 30px",
+        borderBottom: "1px solid rgba(0, 224, 255, 0.2)",
+        position: "relative",
+        overflow: "hidden",
       }}
     >
-      <span style={{ fontSize: "28px" }}>📄</span> Paste Job Description
-    </Typography>
-
-    {/* Optional subtitle for added context */}
-    <Typography 
-      variant="body1" 
-      sx={{ 
-        color: "#BBBBBB", 
-        textAlign: "center", 
-        marginBottom: "25px",
-        fontFamily: "'Poppins', sans-serif",
-      }}
-    >
-      For best results, include all skills and requirements from the job posting
-    </Typography>
-
-    <TextField
-      fullWidth
-      multiline
-      rows={8} // Increased from 4
-      placeholder="Paste the complete job description here to get accurate ATS matching score and AI recommendations..."
-      onChange={(e) => setJobDescription(e.target.value)}
-      InputProps={{
-        sx: {
-          background: "#252836", // Slightly lighter than modal bg
-          color: "#E0E0E0",
-          borderRadius: "12px", // Increased from 8px
-          padding: "16px", // Increased from 12px
-          caretColor: "#00E0FF",
-          fontSize: "15px", // Increased from 14px
-          fontFamily: "'Poppins', sans-serif",
-          "&::placeholder": { color: "#8FA3BF", opacity: 1 },
-        },
-      }}
-      sx={{
-        "& .MuiOutlinedInput-root": {
-          "& fieldset": { 
-            borderColor: "rgba(0, 224, 255, 0.3)",
-            borderWidth: "2px", // Increased from default
-          },
-          "&:hover fieldset": { 
-            borderColor: "#06d6a0",
-            borderWidth: "2px",
-          },
-          "&.Mui-focused fieldset": {
-            borderColor: "#06d6a0",
-            boxShadow: "0px 0px 12px rgba(0, 224, 255, 0.6)",
-            borderWidth: "2px",
-          },
-        },
-      }}
-    />
-
-    <Box sx={{ display: "flex", gap: "15px", marginTop: "25px" }}>
-      {/* Added Cancel button */}
-      <Button
-        variant="outlined"
+      {/* Animated background elements */}
+      <Box
+        sx={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          opacity: 0.1,
+          background: `
+            radial-gradient(circle at 20% 50%, #00E0FF 0%, transparent 50%),
+            radial-gradient(circle at 80% 20%, #06d6a0 0%, transparent 50%)
+          `,
+        }}
+      />
+      
+      <Box sx={{ position: "relative", zIndex: 2 }}>
+        <Typography
+          variant="h4"
+          sx={{
+            color: "#FFFFFF",
+            fontWeight: 700,
+            fontSize: { xs: "1.5rem", sm: "1.8rem" },
+            marginBottom: "8px",
+            display: "flex",
+            alignItems: "center",
+            gap: "12px",
+            fontFamily: "'Inter', sans-serif",
+          }}
+        >
+          <Box
+            sx={{
+              width: "50px",
+              height: "50px",
+              background: "linear-gradient(135deg, #00E0FF 0%, #06d6a0 100%)",
+              borderRadius: "12px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: "24px",
+              boxShadow: "0 8px 25px rgba(0, 224, 255, 0.3)",
+            }}
+          >
+            📋
+          </Box>
+          Job Description
+        </Typography>
+        
+        <Typography
+          variant="body1"
+          sx={{
+            color: "rgba(255, 255, 255, 0.7)",
+            fontSize: "1rem",
+            fontWeight: 400,
+            marginLeft: "62px", // Align with title after icon
+          }}
+        >
+          Paste the complete job posting for accurate ATS analysis
+        </Typography>
+      </Box>
+      
+      {/* Close button */}
+      <IconButton
         onClick={() => setShowJobModal(false)}
         sx={{
-          padding: "14px",
-          flex: "1",
-          fontWeight: "bold",
-          fontSize: "15px",
-          borderRadius: "12px",
-          border: "2px solid rgba(255, 87, 51, 0.7)",
-          color: "#FF5733",
-          textTransform: "none",
-          transition: "all 0.3s ease-in-out",
+          position: "absolute",
+          top: "20px",
+          right: "20px",
+          width: "40px",
+          height: "40px",
+          backgroundColor: "rgba(255, 255, 255, 0.1)",
+          backdropFilter: "blur(10px)",
+          border: "1px solid rgba(255, 255, 255, 0.1)",
+          color: "rgba(255, 255, 255, 0.7)",
+          transition: "all 0.2s ease",
           "&:hover": {
-            backgroundColor: "rgba(255, 87, 51, 0.1)",
-            borderColor: "#FF5733",
+            backgroundColor: "rgba(255, 87, 87, 0.2)",
+            color: "#FF5757",
+            borderColor: "rgba(255, 87, 87, 0.3)",
+            transform: "scale(1.05)",
           },
         }}
       >
-        Cancel
-      </Button>
+        <FaTimes />
+      </IconButton>
+    </Box>
 
-      <Button
-        variant="contained"
-        onClick={handleJobDescriptionSubmit}
+    {/* Content Section */}
+    <Box sx={{ padding: "30px" }}>
+      {/* Instructions Cards */}
+      <Box
         sx={{
-          padding: "14px",
-          flex: "2",
-          fontWeight: "bold",
-          fontSize: "15px",
-          borderRadius: "12px",
-          background: "linear-gradient(135deg, #00E0FF 0%, #06d6a0 100%)",
-          boxShadow: "0px 4px 10px rgba(0, 224, 255, 0.3)",
-          textTransform: "none",
-          transition: "all 0.3s ease-in-out",
-          "&:hover": {
-            transform: "translateY(-2px)",
-            boxShadow: "0px 6px 15px rgba(0, 224, 255, 0.4)",
-            background: "linear-gradient(135deg, #06d6a0 0%, #00E0FF 100%)",
-          },
+          display: "grid",
+          gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
+          gap: "15px",
+          marginBottom: "25px",
         }}
       >
-        🚀 Submit and Analyze
-      </Button>
+        <Box
+          sx={{
+            background: "rgba(0, 224, 255, 0.05)",
+            border: "1px solid rgba(0, 224, 255, 0.2)",
+            borderRadius: "12px",
+            padding: "15px",
+            display: "flex",
+            alignItems: "center",
+            gap: "10px",
+          }}
+        >
+          <Box
+            sx={{
+              width: "35px",
+              height: "35px",
+              background: "rgba(0, 224, 255, 0.2)",
+              borderRadius: "8px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: "16px",
+            }}
+          >
+            🎯
+          </Box>
+          <Box>
+            <Typography sx={{ color: "#00E0FF", fontWeight: 600, fontSize: "0.9rem" }}>
+              Include Skills
+            </Typography>
+            <Typography sx={{ color: "rgba(255, 255, 255, 0.6)", fontSize: "0.75rem" }}>
+              All technical requirements
+            </Typography>
+          </Box>
+        </Box>
+
+        <Box
+          sx={{
+            background: "rgba(6, 214, 160, 0.05)",
+            border: "1px solid rgba(6, 214, 160, 0.2)",
+            borderRadius: "12px",
+            padding: "15px",
+            display: "flex",
+            alignItems: "center",
+            gap: "10px",
+          }}
+        >
+          <Box
+            sx={{
+              width: "35px",
+              height: "35px",
+              background: "rgba(6, 214, 160, 0.2)",
+              borderRadius: "8px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: "16px",
+            }}
+          >
+            📊
+          </Box>
+          <Box>
+            <Typography sx={{ color: "#06d6a0", fontWeight: 600, fontSize: "0.9rem" }}>
+              Complete Text
+            </Typography>
+            <Typography sx={{ color: "rgba(255, 255, 255, 0.6)", fontSize: "0.75rem" }}>
+              For better accuracy
+            </Typography>
+          </Box>
+        </Box>
+      </Box>
+
+      {/* Enhanced Textarea */}
+      <Box sx={{ position: "relative", marginBottom: "25px" }}>
+        <TextField
+          fullWidth
+          multiline
+          rows={10}
+          placeholder="Paste the complete job description here...
+
+Example:
+• Job Title: Senior Software Engineer
+• Required Skills: React, Node.js, Python, AWS
+• Experience: 3-5 years
+• Responsibilities: Develop scalable web applications...
+• Qualifications: Bachelor's degree in Computer Science..."
+          value={jobDescription}
+          onChange={(e) => setJobDescription(e.target.value)}
+          InputProps={{
+            sx: {
+              background: "rgba(10, 25, 41, 0.6)",
+              backdropFilter: "blur(10px)",
+              border: "2px solid rgba(0, 224, 255, 0.2)",
+              borderRadius: "15px",
+              color: "#FFFFFF",
+              fontSize: "15px",
+              fontFamily: "'Inter', sans-serif",
+              lineHeight: 1.6,
+              padding: "20px",
+              transition: "all 0.3s ease",
+              "&:hover": {
+                borderColor: "rgba(0, 224, 255, 0.4)",
+                background: "rgba(10, 25, 41, 0.8)",
+              },
+              "&.Mui-focused": {
+                borderColor: "#00E0FF",
+                background: "rgba(10, 25, 41, 0.9)",
+                boxShadow: "0 0 25px rgba(0, 224, 255, 0.2)",
+              },
+              "& .MuiInputBase-input": {
+                "&::placeholder": {
+                  color: "rgba(255, 255, 255, 0.4)",
+                  opacity: 1,
+                },
+              },
+            },
+          }}
+          sx={{
+            "& .MuiOutlinedInput-root": {
+              "& fieldset": {
+                border: "none",
+              },
+            },
+          }}
+        />
+        
+        {/* Character counter */}
+        <Typography
+          sx={{
+            position: "absolute",
+            bottom: "10px",
+            right: "15px",
+            color: "rgba(255, 255, 255, 0.4)",
+            fontSize: "0.75rem",
+            background: "rgba(10, 25, 41, 0.8)",
+            padding: "4px 8px",
+            borderRadius: "6px",
+            backdropFilter: "blur(5px)",
+          }}
+        >
+          {jobDescription.length} characters
+        </Typography>
+      </Box>
+
+      {/* Action Buttons */}
+      <Box
+        sx={{
+          display: "flex",
+          gap: "15px",
+          flexDirection: { xs: "column", sm: "row" },
+        }}
+      >
+        <Button
+          variant="outlined"
+          onClick={() => setShowJobModal(false)}
+          startIcon={<FaTimes />}
+          sx={{
+            flex: { xs: "1", sm: "0 0 auto" },
+            padding: "15px 25px",
+            borderRadius: "12px",
+            fontSize: "15px",
+            fontWeight: 600,
+            textTransform: "none",
+            border: "2px solid rgba(255, 87, 87, 0.3)",
+            color: "#FF5757",
+            background: "rgba(255, 87, 87, 0.05)",
+            transition: "all 0.3s ease",
+            "&:hover": {
+              borderColor: "#FF5757",
+              background: "rgba(255, 87, 87, 0.1)",
+              transform: "translateY(-2px)",
+              boxShadow: "0 8px 25px rgba(255, 87, 87, 0.2)",
+            },
+          }}
+        >
+          Cancel
+        </Button>
+
+        <Button
+          variant="contained"
+          onClick={handleJobDescriptionSubmit}
+          disabled={!jobDescription.trim()}
+          startIcon={
+            <Box
+              sx={{
+                width: "20px",
+                height: "20px",
+                borderRadius: "50%",
+                background: "linear-gradient(135deg, #FFFFFF 0%, #E0E0E0 100%)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: "12px",
+              }}
+            >
+              🚀
+            </Box>
+          }
+          sx={{
+            flex: "1",
+            padding: "15px 30px",
+            borderRadius: "12px",
+            fontSize: "15px",
+            fontWeight: 700,
+            textTransform: "none",
+            background: jobDescription.trim()
+              ? "linear-gradient(135deg, #00E0FF 0%, #06d6a0 100%)"
+              : "rgba(255, 255, 255, 0.1)",
+            color: jobDescription.trim() ? "#0A1929" : "rgba(255, 255, 255, 0.4)",
+            border: "none",
+            boxShadow: jobDescription.trim()
+              ? "0 8px 25px rgba(0, 224, 255, 0.3)"
+              : "none",
+            transition: "all 0.3s ease",
+            "&:hover": {
+              background: jobDescription.trim()
+                ? "linear-gradient(135deg, #06d6a0 0%, #00E0FF 100%)"
+                : "rgba(255, 255, 255, 0.15)",
+              transform: jobDescription.trim() ? "translateY(-3px)" : "none",
+              boxShadow: jobDescription.trim()
+                ? "0 12px 35px rgba(0, 224, 255, 0.4)"
+                : "none",
+            },
+            "&:disabled": {
+              background: "rgba(255, 255, 255, 0.1)",
+              color: "rgba(255, 255, 255, 0.3)",
+            },
+          }}
+        >
+          {jobDescription.trim() ? "Analyze Resume Match" : "Enter Job Description"}
+        </Button>
+      </Box>
+
+      {/* Bottom Info */}
+      <Box
+        sx={{
+          marginTop: "20px",
+          padding: "15px",
+          background: "rgba(255, 193, 7, 0.05)",
+          border: "1px solid rgba(255, 193, 7, 0.2)",
+          borderRadius: "10px",
+          display: "flex",
+          alignItems: "center",
+          gap: "10px",
+        }}
+      >
+        <Box
+          sx={{
+            width: "30px",
+            height: "30px",
+            background: "rgba(255, 193, 7, 0.2)",
+            borderRadius: "50%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: "14px",
+          }}
+        >
+          💡
+        </Box>
+        <Typography
+          sx={{
+            color: "rgba(255, 255, 255, 0.8)",
+            fontSize: "0.85rem",
+            lineHeight: 1.5,
+          }}
+        >
+          <strong style={{ color: "#FFC107" }}>Pro Tip:</strong> Include the complete job posting with requirements, 
+          responsibilities, and qualifications for the most accurate ATS matching score.
+        </Typography>
+      </Box>
     </Box>
   </motion.div>
 </Modal>
@@ -1013,12 +1369,12 @@ function App() {
         }}
       >
         <Box
-          sx={{
+        sx={{
             background: "#121E2E",
             padding: "25px",
             borderRadius: "16px",
             width: "90%",
-            maxWidth: "420px",
+            maxWidth: "500px",
             margin: "auto",
             boxShadow: "0px 8px 20px rgba(0, 255, 198, 0.15)",
             textAlign: "center",
@@ -1026,61 +1382,70 @@ function App() {
             flexDirection: "column",
             alignItems: "center",
             border: "1px solid rgba(0, 255, 198, 0.3)",
-          }}
-        >
-          <Typography
+        }}
+    >
+        <Typography
             variant="h5"
             sx={{
-              color: "#00FFC6",
-              fontFamily: "'Inter', sans-serif",
-              fontWeight: "bold",
-              letterSpacing: "1px",
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              fontSize: { xs: "1.2rem", sm: "1.4rem" },
+                color: "#00FFC6",
+                fontFamily: "'Inter', sans-serif",
+                fontWeight: "bold",
+                letterSpacing: "1px",
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                fontSize: { xs: "1.2rem", sm: "1.4rem" },
+                marginBottom: "15px"
             }}
-          >
-            ⏳ Chat Cooldown
-          </Typography>
-          <Typography
+        >
+            ⚡ Rate Limits Active
+        </Typography>
+        
+        <Box sx={{ textAlign: "left", marginBottom: "20px", width: "100%" }}>
+            <Typography sx={{ color: "#BBBBBB", marginBottom: "10px", fontSize: "0.9rem" }}>
+                <strong style={{ color: "#00E0FF" }}>Resume Analysis:</strong> {rateLimitStatus.analyze.used}/{rateLimitStatus.analyze.limit} used this hour
+            </Typography>
+            <Typography sx={{ color: "#BBBBBB", marginBottom: "10px", fontSize: "0.9rem" }}>
+                <strong style={{ color: "#FFC107" }}>AI Tailoring:</strong> {rateLimitStatus.tailor.used}/{rateLimitStatus.tailor.limit} used this hour
+            </Typography>
+            <Typography sx={{ color: "#BBBBBB", marginBottom: "15px", fontSize: "0.9rem" }}>
+                <strong style={{ color: "#FF9800" }}>AI Suggestions:</strong> {rateLimitStatus.suggestions.used}/{rateLimitStatus.suggestions.limit} used this hour
+            </Typography>
+        </Box>
+        
+        <Typography
             sx={{
-              fontSize: "0.9rem",
-              color: "#BBBBBB",
-              marginTop: "15px",
-              fontFamily: "'Inter', sans-serif",
-              textAlign: "center",
-              lineHeight: 1.6,
+                fontSize: "0.85rem",
+                color: "#BBBBBB",
+                marginBottom: "20px",
+                fontFamily: "'Inter', sans-serif",
+                textAlign: "center",
+                lineHeight: 1.6,
             }}
-          >
-            AI suggestions use a paid service and are limited to one resume per hour.
+        >
+            AI features use paid OpenAI services and are limited to ensure fair usage.
             <br />
-            Please come back in{" "}
-            <strong style={{ color: "#FFD700", fontSize: "1rem" }}>{cooldownMinutes} minutes</strong>.
-          </Typography>
-          <Button
+            Resume analysis is free with generous limits!
+        </Typography>
+        
+        <Button
             onClick={() => setShowCooldownModal(false)}
             sx={{
-              marginTop: "20px",
-              background: "linear-gradient(90deg, #FF5733, #E84118)",
-              color: "#fff",
-              fontWeight: "bold",
-              padding: "12px 30px",
-              borderRadius: "10px",
-              transition: "all 0.2s ease-in-out",
-              "&:hover": {
-                transform: "translateY(-2px)",
-                boxShadow: "0px 6px 15px rgba(255, 87, 51, 0.3)",
-              },
-              "&:active": {
-                transform: "translateY(1px)",
-                boxShadow: "none",
-              },
+                background: "linear-gradient(90deg, #FF5733, #E84118)",
+                color: "#fff",
+                fontWeight: "bold",
+                padding: "12px 30px",
+                borderRadius: "10px",
+                transition: "all 0.2s ease-in-out",
+                "&:hover": {
+                    transform: "translateY(-2px)",
+                    boxShadow: "0px 6px 15px rgba(255, 87, 51, 0.3)",
+                },
             }}
-          >
-            ❌ Close
-          </Button>
-        </Box>
+        >
+            ✅ Got it!
+        </Button>
+    </Box>
       </Modal>
     </Box>
   );

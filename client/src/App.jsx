@@ -953,7 +953,7 @@ const handleAiSuggestionRequest = async () => {
     alignItems: "center",
     backdropFilter: "blur(8px)",
     backgroundColor: "rgba(10, 25, 41, 0.8)",
-    padding: "20px", // Add padding to prevent modal from touching screen edges
+    padding: "20px",
   }}
 >
   <motion.div
@@ -963,35 +963,32 @@ const handleAiSuggestionRequest = async () => {
     transition={{ duration: 0.4, ease: "easeOut" }}
     style={{
       background: "linear-gradient(145deg, #1A1F2E 0%, #16213E 100%)",
-      padding: "0",
       borderRadius: "20px",
-      width: "min(95vw, 900px)", // Increased width
+      width: "min(95vw, 900px)",
       maxWidth: "900px",
-      maxHeight: "90vh", // Increased height
+      maxHeight: "90vh",
       overflow: "hidden",
       boxShadow: `
         0 25px 50px -12px rgba(0, 0, 0, 0.8),
         0 0 0 1px rgba(0, 224, 255, 0.1),
         inset 0 1px 0 rgba(255, 255, 255, 0.05)
       `,
-      position: "relative",
       display: "flex",
       flexDirection: "column",
     }}
   >
-    {/* Header Section - CENTERED AND NO CLOSE BUTTON */}
+    {/* Header Section - FIXED AND CENTERED */}
     <Box
       sx={{
         background: "linear-gradient(135deg, #0A192F 0%, #1E3A5F 100%)",
-        padding: { xs: "25px 25px", sm: "30px 35px" }, // Centered padding
+        padding: { xs: "25px", sm: "30px" },
         borderBottom: "1px solid rgba(0, 224, 255, 0.2)",
+        textAlign: "center",
         position: "relative",
         overflow: "hidden",
-        flexShrink: 0, // Prevent header from shrinking
-        textAlign: "center", // Center align content
       }}
     >
-      {/* Animated background elements */}
+      {/* Animated background */}
       <Box
         sx={{
           position: "absolute",
@@ -1007,19 +1004,15 @@ const handleAiSuggestionRequest = async () => {
         }}
       />
       
-      <Box sx={{ position: "relative", zIndex: 2, display: "flex", flexDirection: "column", alignItems: "center" }}>
-        <Typography
-          variant="h4"
+      {/* Header Content */}
+      <Box sx={{ position: "relative", zIndex: 2 }}>
+        <Box
           sx={{
-            color: "#FFFFFF",
-            fontWeight: 700,
-            fontSize: { xs: "1.4rem", sm: "1.8rem", md: "2rem" },
-            marginBottom: "8px",
             display: "flex",
             alignItems: "center",
-            justifyContent: "center", // Center the content
+            justifyContent: "center",
             gap: "12px",
-            fontFamily: "'Inter', sans-serif",
+            marginBottom: "8px",
           }}
         >
           <Box
@@ -1037,16 +1030,24 @@ const handleAiSuggestionRequest = async () => {
           >
             📋
           </Box>
-          Job Description
-        </Typography>
+          <Typography
+            variant="h4"
+            sx={{
+              color: "#FFFFFF",
+              fontWeight: 700,
+              fontSize: { xs: "1.4rem", sm: "1.8rem", md: "2rem" },
+              fontFamily: "'Inter', sans-serif",
+            }}
+          >
+            Job Description
+          </Typography>
+        </Box>
         
         <Typography
-          variant="body1"
           sx={{
             color: "rgba(255, 255, 255, 0.7)",
             fontSize: { xs: "0.9rem", sm: "1rem" },
             fontWeight: 400,
-            textAlign: "center", // Center align subtitle
           }}
         >
           Paste the complete job posting for accurate ATS analysis
@@ -1054,105 +1055,113 @@ const handleAiSuggestionRequest = async () => {
       </Box>
     </Box>
 
-    {/* Content Section - MADE SCROLLABLE */}
-    <Box 
-      sx={{ 
-        padding: { xs: "25px", sm: "35px" },
+    {/* Content Section - FIXED SCROLLING */}
+    <Box
+      sx={{
         flex: 1,
-        overflow: "auto",
         display: "flex",
         flexDirection: "column",
-        gap: "25px",
+        overflow: "hidden",
       }}
     >
-      {/* Instructions Cards */}
       <Box
         sx={{
-          display: "grid",
-          gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
-          gap: "15px",
+          padding: { xs: "25px", sm: "35px" },
+          flex: 1,
+          overflow: "auto",
+          display: "flex",
+          flexDirection: "column",
+          gap: "25px",
         }}
       >
+        {/* Instructions Cards */}
         <Box
           sx={{
-            background: "rgba(0, 224, 255, 0.05)",
-            border: "1px solid rgba(0, 224, 255, 0.2)",
-            borderRadius: "12px",
-            padding: "15px",
-            display: "flex",
-            alignItems: "center",
-            gap: "10px",
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
+            gap: "15px",
           }}
         >
           <Box
             sx={{
-              width: "35px",
-              height: "35px",
-              background: "rgba(0, 224, 255, 0.2)",
-              borderRadius: "8px",
+              background: "rgba(0, 224, 255, 0.05)",
+              border: "1px solid rgba(0, 224, 255, 0.2)",
+              borderRadius: "12px",
+              padding: "15px",
               display: "flex",
               alignItems: "center",
-              justifyContent: "center",
-              fontSize: "16px",
-              flexShrink: 0,
+              gap: "10px",
             }}
           >
-            🎯
+            <Box
+              sx={{
+                width: "35px",
+                height: "35px",
+                background: "rgba(0, 224, 255, 0.2)",
+                borderRadius: "8px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: "16px",
+                flexShrink: 0,
+              }}
+            >
+              🎯
+            </Box>
+            <Box>
+              <Typography sx={{ color: "#00E0FF", fontWeight: 600, fontSize: "0.9rem" }}>
+                Include Skills
+              </Typography>
+              <Typography sx={{ color: "rgba(255, 255, 255, 0.6)", fontSize: "0.75rem" }}>
+                All technical requirements
+              </Typography>
+            </Box>
           </Box>
-          <Box>
-            <Typography sx={{ color: "#00E0FF", fontWeight: 600, fontSize: "0.9rem" }}>
-              Include Skills
-            </Typography>
-            <Typography sx={{ color: "rgba(255, 255, 255, 0.6)", fontSize: "0.75rem" }}>
-              All technical requirements
-            </Typography>
-          </Box>
-        </Box>
 
-        <Box
-          sx={{
-            background: "rgba(6, 214, 160, 0.05)",
-            border: "1px solid rgba(6, 214, 160, 0.2)",
-            borderRadius: "12px",
-            padding: "15px",
-            display: "flex",
-            alignItems: "center",
-            gap: "10px",
-          }}
-        >
           <Box
             sx={{
-              width: "35px",
-              height: "35px",
-              background: "rgba(6, 214, 160, 0.2)",
-              borderRadius: "8px",
+              background: "rgba(6, 214, 160, 0.05)",
+              border: "1px solid rgba(6, 214, 160, 0.2)",
+              borderRadius: "12px",
+              padding: "15px",
               display: "flex",
               alignItems: "center",
-              justifyContent: "center",
-              fontSize: "16px",
-              flexShrink: 0,
+              gap: "10px",
             }}
           >
-            📊
-          </Box>
-          <Box>
-            <Typography sx={{ color: "#06d6a0", fontWeight: 600, fontSize: "0.9rem" }}>
-              Complete Text
-            </Typography>
-            <Typography sx={{ color: "rgba(255, 255, 255, 0.6)", fontSize: "0.75rem" }}>
-              For better accuracy
-            </Typography>
+            <Box
+              sx={{
+                width: "35px",
+                height: "35px",
+                background: "rgba(6, 214, 160, 0.2)",
+                borderRadius: "8px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: "16px",
+                flexShrink: 0,
+              }}
+            >
+              📊
+            </Box>
+            <Box>
+              <Typography sx={{ color: "#06d6a0", fontWeight: 600, fontSize: "0.9rem" }}>
+                Complete Text
+              </Typography>
+              <Typography sx={{ color: "rgba(255, 255, 255, 0.6)", fontSize: "0.75rem" }}>
+                For better accuracy
+              </Typography>
+            </Box>
           </Box>
         </Box>
-      </Box>
 
-      {/* Enhanced Textarea - FIXED PADDING ISSUE */}
-      <Box sx={{ position: "relative", flex: 1, minHeight: "300px" }}>
-        <TextField
-          fullWidth
-          multiline
-          rows={12} // Increased rows for better visibility
-          placeholder="Paste the complete job description here...
+        {/* Textarea Section - FIXED */}
+        <Box sx={{ position: "relative", flex: 1, minHeight: "300px" }}>
+          <TextField
+            fullWidth
+            multiline
+            rows={12}
+            placeholder="Paste the complete job description here...
 
 Example:
 • Job Title: Senior Software Engineer
@@ -1160,196 +1169,202 @@ Example:
 • Experience: 3-5 years
 • Responsibilities: Develop scalable web applications...
 • Qualifications: Bachelor's degree in Computer Science..."
-          value={jobDescription}
-          onChange={(e) => setJobDescription(e.target.value)}
-          InputProps={{
-            sx: {
-              background: "rgba(10, 25, 41, 0.6)",
-              backdropFilter: "blur(10px)",
-              border: "2px solid rgba(0, 224, 255, 0.2)",
-              borderRadius: "15px",
-              color: "#FFFFFF",
-              fontSize: "15px",
-              fontFamily: "'Inter', sans-serif",
-              lineHeight: 1.6,
-              padding: "0", // REMOVED PADDING - This was causing the issue!
-              transition: "all 0.3s ease",
-              "&:hover": {
-                borderColor: "rgba(0, 224, 255, 0.4)",
-                background: "rgba(10, 25, 41, 0.8)",
-              },
-              "&.Mui-focused": {
-                borderColor: "#00E0FF",
-                background: "rgba(10, 25, 41, 0.9)",
-                boxShadow: "0 0 25px rgba(0, 224, 255, 0.2)",
-              },
-              "& .MuiInputBase-input": {
-                padding: "20px !important", // Apply padding only to the actual input
-                "&::placeholder": {
-                  color: "rgba(255, 255, 255, 0.4)",
-                  opacity: 1,
+            value={jobDescription}
+            onChange={(e) => setJobDescription(e.target.value)}
+            InputProps={{
+              sx: {
+                background: "rgba(10, 25, 41, 0.6)",
+                backdropFilter: "blur(10px)",
+                border: "2px solid rgba(0, 224, 255, 0.2)",
+                borderRadius: "15px",
+                color: "#FFFFFF",
+                fontSize: "15px",
+                fontFamily: "'Inter', sans-serif",
+                lineHeight: 1.6,
+                transition: "all 0.3s ease",
+                "&:hover": {
+                  borderColor: "rgba(0, 224, 255, 0.4)",
+                  background: "rgba(10, 25, 41, 0.8)",
+                },
+                "&.Mui-focused": {
+                  borderColor: "#00E0FF",
+                  background: "rgba(10, 25, 41, 0.9)",
+                  boxShadow: "0 0 25px rgba(0, 224, 255, 0.2)",
+                },
+                "& .MuiInputBase-input": {
+                  padding: "20px !important",
+                  "&::placeholder": {
+                    color: "rgba(255, 255, 255, 0.4)",
+                    opacity: 1,
+                  },
                 },
               },
-            },
-          }}
-          sx={{
-            "& .MuiOutlinedInput-root": {
-              "& fieldset": {
-                border: "none",
+            }}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                "& fieldset": {
+                  border: "none",
+                },
               },
-            },
-            height: "100%",
-          }}
-        />
-        
-        {/* Character counter */}
-        <Typography
-          sx={{
-            position: "absolute",
-            bottom: "15px",
-            right: "20px",
-            color: "rgba(255, 255, 255, 0.4)",
-            fontSize: "0.75rem",
-            background: "rgba(10, 25, 41, 0.8)",
-            padding: "4px 8px",
-            borderRadius: "6px",
-            backdropFilter: "blur(5px)",
-            pointerEvents: "none", // Prevent interference with textarea
-          }}
-        >
-          {jobDescription.length} characters
-        </Typography>
-      </Box>
+              height: "100%",
+            }}
+          />
+          
+          {/* Character counter */}
+          <Typography
+            sx={{
+              position: "absolute",
+              bottom: "15px",
+              right: "20px",
+              color: "rgba(255, 255, 255, 0.4)",
+              fontSize: "0.75rem",
+              background: "rgba(10, 25, 41, 0.8)",
+              padding: "4px 8px",
+              borderRadius: "6px",
+              backdropFilter: "blur(5px)",
+              pointerEvents: "none",
+            }}
+          >
+            {jobDescription.length} characters
+          </Typography>
+        </Box>
 
-      {/* Pro Tip - MOVED ABOVE BUTTONS */}
-      <Box
-        sx={{
-          padding: "15px",
-          background: "rgba(255, 193, 7, 0.05)",
-          border: "1px solid rgba(255, 193, 7, 0.2)",
-          borderRadius: "10px",
-          display: "flex",
-          alignItems: "flex-start",
-          gap: "10px",
-        }}
-      >
+        {/* Pro Tip */}
         <Box
           sx={{
-            width: "30px",
-            height: "30px",
-            background: "rgba(255, 193, 7, 0.2)",
-            borderRadius: "50%",
+            padding: "15px",
+            background: "rgba(255, 193, 7, 0.05)",
+            border: "1px solid rgba(255, 193, 7, 0.2)",
+            borderRadius: "10px",
             display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: "14px",
-            flexShrink: 0,
-            marginTop: "2px",
+            alignItems: "flex-start",
+            gap: "10px",
           }}
         >
-          💡
+          <Box
+            sx={{
+              width: "30px",
+              height: "30px",
+              background: "rgba(255, 193, 7, 0.2)",
+              borderRadius: "50%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: "14px",
+              flexShrink: 0,
+            }}
+          >
+            💡
+          </Box>
+          <Typography
+            sx={{
+              color: "rgba(255, 255, 255, 0.8)",
+              fontSize: "0.85rem",
+              lineHeight: 1.5,
+            }}
+          >
+            <strong style={{ color: "#FFC107" }}>Pro Tip:</strong> Include the complete job posting with requirements, 
+            responsibilities, and qualifications for the most accurate ATS matching score.
+          </Typography>
         </Box>
-        <Typography
-          sx={{
-            color: "rgba(255, 255, 255, 0.8)",
-            fontSize: "0.85rem",
-            lineHeight: 1.5,
-          }}
-        >
-          <strong style={{ color: "#FFC107" }}>Pro Tip:</strong> Include the complete job posting with requirements, 
-          responsibilities, and qualifications for the most accurate ATS matching score.
-        </Typography>
       </Box>
 
       {/* Action Buttons - FIXED POSITIONING */}
       <Box
         sx={{
-          display: "flex",
-          gap: "15px",
-          flexDirection: { xs: "column", sm: "row" },
-          flexShrink: 0, // Prevent buttons from shrinking
-          paddingTop: "10px",
+          padding: { xs: "20px 25px", sm: "25px 35px" },
+          borderTop: "1px solid rgba(255, 255, 255, 0.1)",
+          background: "rgba(10, 25, 41, 0.3)",
+          backdropFilter: "blur(10px)",
         }}
       >
-        <Button
-          variant="outlined"
-          onClick={() => setShowJobModal(false)}
-          startIcon={<FaTimes />}
+        <Box
           sx={{
-            flex: { xs: "1", sm: "0 0 auto" },
-            padding: "15px 25px",
-            borderRadius: "12px",
-            fontSize: "15px",
-            fontWeight: 600,
-            textTransform: "none",
-            border: "2px solid rgba(255, 87, 87, 0.3)",
-            color: "#FF5757",
-            background: "rgba(255, 87, 87, 0.05)",
-            transition: "all 0.3s ease",
-            "&:hover": {
-              borderColor: "#FF5757",
-              background: "rgba(255, 87, 87, 0.1)",
-              transform: "translateY(-2px)",
-              boxShadow: "0 8px 25px rgba(255, 87, 87, 0.2)",
-            },
+            display: "flex",
+            gap: "15px",
+            flexDirection: { xs: "column", sm: "row" },
           }}
         >
-          Cancel
-        </Button>
+          <Button
+            variant="outlined"
+            onClick={() => setShowJobModal(false)}
+            startIcon={<FaTimes />}
+            sx={{
+              flex: { xs: "1", sm: "0 0 auto" },
+              padding: "15px 25px",
+              borderRadius: "12px",
+              fontSize: "15px",
+              fontWeight: 600,
+              textTransform: "none",
+              border: "2px solid rgba(255, 87, 87, 0.3)",
+              color: "#FF5757",
+              background: "rgba(255, 87, 87, 0.05)",
+              transition: "all 0.3s ease",
+              "&:hover": {
+                borderColor: "#FF5757",
+                background: "rgba(255, 87, 87, 0.1)",
+                transform: "translateY(-2px)",
+                boxShadow: "0 8px 25px rgba(255, 87, 87, 0.2)",
+              },
+            }}
+          >
+            Cancel
+          </Button>
 
-        <Button
-          variant="contained"
-          onClick={handleJobDescriptionSubmit}
-          disabled={!jobDescription.trim()}
-          startIcon={
-            <Box
-              sx={{
-                width: "20px",
-                height: "20px",
-                borderRadius: "50%",
-                background: "linear-gradient(135deg, #FFFFFF 0%, #E0E0E0 100%)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: "12px",
-              }}
-            >
-              🚀
-            </Box>
-          }
-          sx={{
-            flex: "1",
-            padding: "15px 30px",
-            borderRadius: "12px",
-            fontSize: "15px",
-            fontWeight: 700,
-            textTransform: "none",
-            background: jobDescription.trim()
-              ? "linear-gradient(135deg, #00E0FF 0%, #06d6a0 100%)"
-              : "rgba(255, 255, 255, 0.1)",
-            color: jobDescription.trim() ? "#0A1929" : "rgba(255, 255, 255, 0.4)",
-            border: "none",
-            boxShadow: jobDescription.trim()
-              ? "0 8px 25px rgba(0, 224, 255, 0.3)"
-              : "none",
-            transition: "all 0.3s ease",
-            "&:hover": {
+          <Button
+            variant="contained"
+            onClick={handleJobDescriptionSubmit}
+            disabled={!jobDescription.trim()}
+            startIcon={
+              <Box
+                sx={{
+                  width: "20px",
+                  height: "20px",
+                  borderRadius: "50%",
+                  background: "linear-gradient(135deg, #FFFFFF 0%, #E0E0E0 100%)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: "12px",
+                }}
+              >
+                🚀
+              </Box>
+            }
+            sx={{
+              flex: "1",
+              padding: "15px 30px",
+              borderRadius: "12px",
+              fontSize: "15px",
+              fontWeight: 700,
+              textTransform: "none",
               background: jobDescription.trim()
-                ? "linear-gradient(135deg, #06d6a0 0%, #00E0FF 100%)"
-                : "rgba(255, 255, 255, 0.15)",
-              transform: jobDescription.trim() ? "translateY(-3px)" : "none",
+                ? "linear-gradient(135deg, #00E0FF 0%, #06d6a0 100%)"
+                : "rgba(255, 255, 255, 0.1)",
+              color: jobDescription.trim() ? "#0A1929" : "rgba(255, 255, 255, 0.4)",
+              border: "none",
               boxShadow: jobDescription.trim()
-                ? "0 12px 35px rgba(0, 224, 255, 0.4)"
+                ? "0 8px 25px rgba(0, 224, 255, 0.3)"
                 : "none",
-            },
-            "&:disabled": {
-              background: "rgba(255, 255, 255, 0.1)",
-              color: "rgba(255, 255, 255, 0.3)",
-            },
-          }}
-        >
-          {jobDescription.trim() ? "Analyze Resume Match" : "Enter Job Description"}
-        </Button>
+              transition: "all 0.3s ease",
+              "&:hover": {
+                background: jobDescription.trim()
+                  ? "linear-gradient(135deg, #06d6a0 0%, #00E0FF 100%)"
+                  : "rgba(255, 255, 255, 0.15)",
+                transform: jobDescription.trim() ? "translateY(-3px)" : "none",
+                boxShadow: jobDescription.trim()
+                  ? "0 12px 35px rgba(0, 224, 255, 0.4)"
+                  : "none",
+              },
+              "&:disabled": {
+                background: "rgba(255, 255, 255, 0.1)",
+                color: "rgba(255, 255, 255, 0.3)",
+              },
+            }}
+          >
+            {jobDescription.trim() ? "Analyze Resume Match" : "Enter Job Description"}
+          </Button>
+        </Box>
       </Box>
     </Box>
   </motion.div>

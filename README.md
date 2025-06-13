@@ -6,6 +6,9 @@
 [![Tech Stack](https://img.shields.io/badge/Stack-React_|_Node.js_|_OpenAI_GPT4-success?style=for-the-badge)](#tech-architecture)
 [![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)](LICENSE)
 
+
+![image](https://github.com/user-attachments/assets/8ba278e5-100b-460b-b4ec-aeae9f42d5ef)
+
 ---
 
 ## 🎯 **Executive Summary**

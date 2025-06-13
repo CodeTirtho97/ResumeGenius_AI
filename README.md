@@ -1,4 +1,4 @@
-# 🚀 ResumeGenius AI - Enterprise-Grade Resume Optimization Platform
+# 🚀 ResumeGenius AI - Resume Analyzer & ATS Optimizer
 
 > **Next-generation AI-powered resume analysis platform leveraging OpenAI GPT-4, advanced NLP algorithms, and intelligent ATS optimization to maximize job application success rates.**
 
@@ -18,7 +18,7 @@ ResumeGenius AI is a **full-stack enterprise application** that revolutionizes r
 ### **Key Metrics & Impact**
 
 - 🎯 **90%+ ATS compatibility** scoring accuracy
-- ⚡ **Sub-3-second** resume analysis with intelligent caching
+- ⚡ **Sub-5-second** resume analysis with intelligent caching
 - 🔄 **Real-time AI suggestions** with contextual relevance scoring
 - 📊 **Advanced skill gap analysis** using TF-IDF algorithms
 - 🛡️ **Enterprise-grade security** with automatic data purging

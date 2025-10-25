@@ -33,8 +33,6 @@ import SkeletonLoader from "./components/SkeletonLoader";
 import ProcessingAnimation from "./components/ProcessingAnimation";
 // eslint-disable-next-line react/prop-types
 import InfoPanel from "./components/InfoPanel";
-// eslint-disable-next-line react/prop-types
-import BackgroundSVG from "./components/BackgroundSVG";
 
 function App() {
   const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
@@ -537,7 +535,6 @@ const handleAiSuggestionRequest = async () => {
         position: "relative",
       }}
     >
-      <BackgroundSVG />
 
       <Box
         sx={{

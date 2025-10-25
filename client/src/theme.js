@@ -1,7 +1,5 @@
-// Create this file: client/src/theme.js
 import { createTheme } from "@mui/material/styles";
 
-// Modern, professional dark theme with improved spacing and typography
 const theme = createTheme({
   palette: {
     mode: "dark",
